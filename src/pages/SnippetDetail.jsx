@@ -352,22 +352,13 @@ const SnippetDetail = () => {
               </>
             )}
             {!isOwner && snippet.isPublic && user && (
-              <>
-                <button
-                  onClick={handleFork}
-                  disabled={forking}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium disabled:opacity-50"
-                >
-                  {forking ? 'Forking...' : 'Fork'}
-                </button>
-                <button
-                  onClick={() => setShowAddToCollection(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
-                >
-                  <FaPlus className="w-4 h-4" />
-                  Add to Collection
-                </button>
-              </>
+              <button
+                onClick={handleFork}
+                disabled={forking}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium disabled:opacity-50"
+              >
+                {forking ? 'Forking...' : 'Fork'}
+              </button>
             )}
             {user && (
               <button
@@ -398,7 +389,7 @@ const SnippetDetail = () => {
             {(() => {
               // Filter collections: private snippets -> private collections, public snippets -> public collections
               const matchingCollections = userCollections.filter(collection => 
-                collection.isPublic === snippet.isPublic
+                snippet.isPublic || !collection.isPublic
               );
               
               if (matchingCollections.length === 0) {
@@ -410,7 +401,7 @@ const SnippetDetail = () => {
                     </p>
                     <p className="text-custom-grey dark:text-slate-400 text-sm mb-4">
                       {snippet.isPublic 
-                        ? 'Create a public collection to add this public snippet'
+                        ? 'Create a collection to add this public snippet'
                         : 'Create a private collection to add this private snippet'}
                     </p>
                     <Link
@@ -421,7 +412,7 @@ const SnippetDetail = () => {
                       }}
                       className="px-4 py-2 bg-custom-orangered text-white rounded-md hover:bg-orange-600 text-sm font-medium inline-block"
                     >
-                      Create {snippet.isPublic ? 'Public' : 'Private'} Collection
+                      Create {snippet.isPublic ? 'Collection' : 'Private Collection'}
                     </Link>
                   </div>
                 );

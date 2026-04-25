@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { FaEye, FaCodeBranch, FaUser, FaTrash, FaLock, FaUnlock, FaPlus, FaCopy, FaCheck } from 'react-icons/fa';
 
 const SnippetCard = ({ snippet }) => {
-  const codePreview = snippet.code.substring(0, 100);
+  const codePreview = snippet.code ? snippet.code.substring(0, 100) : '';
   const { user } = useAuth();
   const navigate = useNavigate();
   const [forking, setForking] = useState(false);
@@ -377,7 +377,7 @@ const SnippetCard = ({ snippet }) => {
               ) : (() => {
        
                 const matchingCollections = userCollections.filter(collection => 
-                  collection.isPublic === snippet.isPublic
+                  snippet.isPublic || !collection.isPublic
                 );
                 
                 if (matchingCollections.length === 0) {
@@ -388,20 +388,20 @@ const SnippetCard = ({ snippet }) => {
                         No {snippet.isPublic ? 'public' : 'private'} collections available
                       </p>
                       <p className="text-custom-grey dark:text-slate-400 text-sm mb-4">
-                        {snippet.isPublic 
-                          ? 'Create a public collection to add this public snippet'
-                          : 'Create a private collection to add this private snippet'}
-                      </p>
-                      <Link
-                        to="/collections"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowAddToCollection(false);
-                        }}
-                        className="px-4 py-2 bg-custom-orangered text-white rounded-md hover:bg-orange-600 text-sm font-medium inline-block"
-                      >
-                        Create {snippet.isPublic ? 'Public' : 'Private'} Collection
-                      </Link>
+                      {snippet.isPublic 
+                        ? 'Create a collection to add this public snippet'
+                        : 'Create a private collection to add this private snippet'}
+                    </p>
+                    <Link
+                      to="/collections"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowAddToCollection(false);
+                      }}
+                      className="px-4 py-2 bg-custom-orangered text-white rounded-md hover:bg-orange-600 text-sm font-medium inline-block"
+                    >
+                      Create {snippet.isPublic ? 'Collection' : 'Private Collection'}
+                    </Link>
                     </div>
                   );
                 }
