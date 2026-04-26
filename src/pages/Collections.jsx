@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { collectionsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { hasProfanity } from '../utils/profanityFilter';
 
 const Collections = () => {
   const { user } = useAuth();
@@ -60,6 +61,12 @@ const Collections = () => {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+
+    if (hasProfanity(newCollection.name) || hasProfanity(newCollection.description)) {
+      alert('Profanity detected in name or description. Please use appropriate language.');
+      return;
+    }
+
     try {
       await collectionsAPI.create(newCollection);
       setShowModal(false);

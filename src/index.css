@@ -4,7 +4,33 @@
 
 @layer base {
   body {
+    font-family: 'Inter', sans-serif;
     @apply min-h-screen bg-white text-slate-900 dark:bg-custom-dark-bg dark:text-custom-dark-text antialiased;
   }
+  
+  h1 {
+    font-family: 'League Spartan', sans-serif;
+  }
+
+  h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  p, span, li, input, textarea, select {
+    font-family: 'Inter', sans-serif;
+  }
+
+  button, a, nav, .btn {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  label, .caption, .badge {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'Fira Code', monospace !important;
+  }
+
   ::selection { @apply bg-orange-200/60 text-slate-900; }
 }

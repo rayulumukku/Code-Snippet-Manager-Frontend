@@ -5,6 +5,7 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { snippetsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import CodeExecutor from '../components/CodeExecutor';
+import { hasProfanity } from '../utils/profanityFilter';
 
 const SnippetEditor = () => {
   const { id } = useParams();
@@ -122,6 +123,18 @@ const SnippetEditor = () => {
     e.preventDefault();
     setError('');
     setSaving(true);
+
+    if (hasProfanity(formData.title)) {
+      setError('Profanity detected in title. Please use appropriate language.');
+      setSaving(false);
+      return;
+    }
+
+    if (hasProfanity(formData.description)) {
+      setError('Profanity detected in description. Please use appropriate language.');
+      setSaving(false);
+      return;
+    }
 
     try {
       if (isEdit) {
