@@ -52,7 +52,7 @@ const SnippetEditor = () => {
   ];
 
   useEffect(() => {
-    document.title = isEdit ? 'Edit Snippet | Rayulu M' : 'Create Snippet | Rayulu M';
+    document.title = isEdit ? 'Edit Snippet | Rayulu Mukku' : 'Create Snippet | Rayulu Mukku';
   }, [isEdit]);
 
   useEffect(() => {

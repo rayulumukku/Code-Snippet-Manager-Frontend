@@ -15,7 +15,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'Register | Rayulu M';
+    document.title = 'Register | Rayulu Mukku';
   }, []);
 
   const handleChange = (e) => {

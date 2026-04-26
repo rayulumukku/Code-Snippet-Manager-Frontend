@@ -27,9 +27,9 @@ const SnippetDetail = () => {
 
   useEffect(() => {
     if (snippet) {
-      document.title = `${snippet.title} | Rayulu M`;
+      document.title = `${snippet.title} | Rayulu Mukku`;
     } else {
-      document.title = 'Snippet | Rayulu M';
+      document.title = 'Snippet | Rayulu Mukku';
     }
   }, [snippet]);
 

@@ -10,7 +10,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'Login | Rayulu M';
+    document.title = 'Login | Rayulu Mukku';
   }, []);
 
   const handleChange = (e) => {

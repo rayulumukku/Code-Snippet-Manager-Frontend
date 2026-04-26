@@ -15,9 +15,9 @@ const CollectionDetail = () => {
 
   useEffect(() => {
     if (collection) {
-      document.title = `${collection.name} | Rayulu M`;
+      document.title = `${collection.name} | Rayulu Mukku`;
     } else {
-      document.title = 'Collection | Rayulu M';
+      document.title = 'Collection | Rayulu Mukku';
     }
   }, [collection]);
 

@@ -12,7 +12,7 @@ const Search = () => {
   const [type, setType] = useState('snippets');
 
   useEffect(() => {
-    document.title = 'Search | Rayulu M';
+    document.title = 'Search | Rayulu Mukku';
   }, []);
 
   const languages = [

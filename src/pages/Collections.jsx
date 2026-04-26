@@ -16,7 +16,7 @@ const Collections = () => {
   const [filterPublic, setFilterPublic] = useState('all'); 
 
   useEffect(() => {
-    document.title = 'Collections | Rayulu M';
+    document.title = 'Collections | Rayulu Mukku';
   }, []);
 
   useEffect(() => {

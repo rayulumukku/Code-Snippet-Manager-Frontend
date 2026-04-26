@@ -30,7 +30,7 @@ const Home = () => {
   ];
 
   useEffect(() => {
-    document.title = 'Home | Rayulu M';
+    document.title = 'Home | Rayulu Mukku';
   }, []);
 
   useEffect(() => {
