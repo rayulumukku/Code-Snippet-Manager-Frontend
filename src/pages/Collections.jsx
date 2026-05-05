@@ -101,7 +101,7 @@ const Collections = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-custom-black dark:text-custom-dark-text">Collections</h1>
           <p className="text-custom-grey dark:text-slate-400 mt-1">
@@ -129,7 +129,7 @@ const Collections = () => {
             className="w-full px-4 py-2 border border-custom-grey rounded-md focus:outline-none focus:ring-custom-orangered focus:border-custom-orangered text-custom-black dark:text-custom-dark-text bg-white dark:bg-slate-800"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilterPublic('all')}
             className={`px-4 py-2 rounded-md text-sm font-medium ${

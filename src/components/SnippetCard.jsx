@@ -153,13 +153,13 @@ const SnippetCard = ({ snippet }) => {
   return (
     <div className="group bg-white dark:bg-custom-dark-card border border-slate-200 dark:border-white/10 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden relative">
       <div className="p-5">
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3 gap-2">
           <Link to={`/snippets/${snippet._id}`} className="flex-1">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 group-hover:text-custom-orangered">
               {snippet.title}
             </h3>
           </Link>
-          <div className="flex items-center gap-2 ml-2">
+          <div className="flex flex-wrap items-center gap-2">
             {isOwner && (
               <div className="flex gap-1">
                 <button
@@ -208,8 +208,8 @@ const SnippetCard = ({ snippet }) => {
           </button>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
             <span className="inline-flex items-center gap-1">
               <FaUser className="w-4 h-4" />
               {snippet.author?.username || 'Unknown'}
@@ -305,7 +305,7 @@ const SnippetCard = ({ snippet }) => {
               <span className="text-custom-orangered">Forked</span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {snippet.isPublic ? (
               <span className="text-xs sm:text-sm text-emerald-600">Public</span>
             ) : (

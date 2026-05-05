@@ -163,7 +163,7 @@ const SnippetEditor = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-custom-black mb-6">
+      <h1 className="text-2xl sm:text-3xl font-bold text-custom-black mb-6">
         {isEdit ? 'Edit Snippet' : 'Create New Snippet'}
       </h1>
 
@@ -285,7 +285,7 @@ const SnippetEditor = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-custom-grey">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-custom-grey gap-4">
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -308,7 +308,7 @@ const SnippetEditor = () => {
           </span>
         </div>
 
-        <div className="flex justify-end space-x-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 sm:space-x-4">
           <button
             type="button"
             onClick={() => navigate('/')}

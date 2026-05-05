@@ -113,7 +113,7 @@ const CollectionDetail = () => {
       )}
 
       <div className="bg-custom-white dark:bg-custom-dark-card rounded-lg shadow-md p-6 mb-6 border border-slate-200 dark:border-white/10">
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-4">
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-custom-black dark:text-custom-dark-text mb-2">{collection.name}</h1>
             {collection.description && (
@@ -160,7 +160,7 @@ const CollectionDetail = () => {
               </div>
             )}
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span
               className={`px-3 py-1 text-sm font-medium rounded-full ${
                 collection.isPublic

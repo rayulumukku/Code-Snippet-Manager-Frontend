@@ -158,10 +158,10 @@ const SnippetDetail = () => {
       )}
 
       <div className="bg-custom-white rounded-lg shadow-md p-6">
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-4">
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-custom-black mb-2">{snippet.title}</h1>
-            <div className="flex items-center space-x-4 text-sm text-custom-grey mb-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-custom-grey mb-4">
               <span>By {snippet.author?.username || 'Unknown'}</span>
               <span>•</span>
               <div 
@@ -262,7 +262,7 @@ const SnippetDetail = () => {
               )}
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span
               className={`px-3 py-1 text-sm font-medium rounded-full ${
                 snippet.isPublic
@@ -325,14 +325,14 @@ const SnippetDetail = () => {
           <CodeExecutor code={snippet.code} language={snippet.language} />
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-custom-grey">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-custom-grey gap-4">
           <div className="text-sm text-custom-grey">
             Created {new Date(snippet.createdAt).toLocaleDateString()}
             {snippet.updatedAt !== snippet.createdAt && (
               <span> • Updated {new Date(snippet.updatedAt).toLocaleDateString()}</span>
             )}
           </div>
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             {isOwner && (
               <>
                 <Link
