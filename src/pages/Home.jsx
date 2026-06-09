@@ -91,10 +91,6 @@ const Home = () => {
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
           <div className="max-w-2xl animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-semibold mb-4 border border-orange-200 dark:border-orange-800/40">
-              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-              Developer-first snippet manager
-            </div>
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white mb-4 leading-tight">
               Find, save and share<br />
               <span className="gradient-text">your best code</span>
