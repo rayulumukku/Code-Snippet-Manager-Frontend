@@ -5,9 +5,7 @@ const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 
@@ -19,15 +17,23 @@ export const AuthProvider = ({ children }) => {
     const initAuth = async () => {
       const token = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
-      
+
       if (token && storedUser) {
         try {
+          // Hydrate immediately from storage so UI isn't blank
+          setUser(JSON.parse(storedUser));
+          // Then verify & refresh from server
           const response = await authAPI.getMe();
-          setUser(response.data);
-          localStorage.setItem('user', JSON.stringify(response.data));
+          const freshUser = response.data;
+          setUser(freshUser);
+          localStorage.setItem('user', JSON.stringify(freshUser));
         } catch (error) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          // Token invalid — try refresh (handled by axios interceptor)
+          // If refresh fails, the interceptor clears storage
+          const stored = localStorage.getItem('token');
+          if (!stored) {
+            setUser(null);
+          }
         }
       }
       setLoading(false);
@@ -46,31 +52,36 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (username, email, password) => {
-    try {
-      const response = await authAPI.register({ username, email, password });
-      if (response.data && response.data.token) {
-        const { token, ...userData } = response.data;
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-        return response.data;
-      } else {
-        throw new Error('Invalid response from server');
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
-    }
+    const response = await authAPI.register({ username, email, password });
+    if (!response.data?.token) throw new Error('Invalid response from server');
+    const { token, ...userData } = response.data;
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+    return response.data;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (_) {
+      // Silently ignore logout errors
+    }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
   };
 
+  const updateProfile = async (data) => {
+    const response = await authAPI.updateProfile(data);
+    const updated = response.data;
+    setUser(prev => ({ ...prev, ...updated }));
+    localStorage.setItem('user', JSON.stringify({ ...user, ...updated }));
+    return updated;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

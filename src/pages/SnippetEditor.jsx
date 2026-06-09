@@ -4,17 +4,23 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { snippetsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import CodeExecutor from '../components/CodeExecutor';
-import { hasProfanity } from '../utils/profanityFilter';
+
+const languages = [
+  'javascript','python','java','typescript','cpp','c','csharp','ruby',
+  'go','rust','php','swift','kotlin','html','css','sql','json','xml',
+  'markdown','shell','other',
+];
 
 const SnippetEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isEdit = id && id !== 'new';
+  const { toast } = useToast();
+  const isEdit = Boolean(id);
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -24,54 +30,24 @@ const SnippetEditor = () => {
     tags: [],
     isPublic: false,
   });
-
   const [tagInput, setTagInput] = useState('');
-
-  const languages = [
-    'javascript',
-    'python',
-    'java',
-    'typescript',
-    'cpp',
-    'c',
-    'csharp',
-    'ruby',
-    'go',
-    'rust',
-    'php',
-    'swift',
-    'kotlin',
-    'html',
-    'css',
-    'sql',
-    'json',
-    'xml',
-    'markdown',
-    'shell',
-    'other',
-  ];
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
-    document.title = isEdit ? 'Edit Snippet | Rayulu Mukku' : 'Create Snippet | Rayulu Mukku';
+    document.title = isEdit ? 'Edit Snippet | Code Snippet Manager' : 'Create Snippet | Code Snippet Manager';
   }, [isEdit]);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    if (isEdit) {
-      fetchSnippet();
-    }
-  }, [id, user]);
+    if (isEdit) fetchSnippet();
+  }, [id]);
 
   const fetchSnippet = async () => {
     try {
-      const response = await snippetsAPI.getById(id);
-      const snippet = response.data;
+      const res = await snippetsAPI.getById(id);
+      const snippet = res.data;
 
-      if (snippet.author._id !== user._id) {
+      // Redirect if not the owner
+      if (snippet.author._id !== user?._id) {
         navigate('/');
         return;
       }
@@ -85,7 +61,8 @@ const SnippetEditor = () => {
         isPublic: snippet.isPublic,
       });
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load snippet');
+      toast.error(err.response?.data?.message || 'Failed to load snippet');
+      navigate('/');
     } finally {
       setLoading(false);
     }
@@ -93,58 +70,40 @@ const SnippetEditor = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
+    setFormData(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleTagAdd = (e) => {
     if (e.key === 'Enter' && tagInput.trim()) {
       e.preventDefault();
-      if (!formData.tags.includes(tagInput.trim())) {
-        setFormData({
-          ...formData,
-          tags: [...formData.tags, tagInput.trim()],
-        });
+      const trimmed = tagInput.trim().toLowerCase();
+      if (!formData.tags.includes(trimmed) && formData.tags.length < 10) {
+        setFormData(f => ({ ...f, tags: [...f.tags, trimmed] }));
       }
       setTagInput('');
     }
   };
 
   const handleTagRemove = (tag) => {
-    setFormData({
-      ...formData,
-      tags: formData.tags.filter((t) => t !== tag),
-    });
+    setFormData(f => ({ ...f, tags: f.tags.filter(t => t !== tag) }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setSaving(true);
-
-    if (hasProfanity(formData.title)) {
-      setError('Profanity detected in title. Please use appropriate language.');
-      setSaving(false);
-      return;
-    }
-
-    if (hasProfanity(formData.description)) {
-      setError('Profanity detected in description. Please use appropriate language.');
-      setSaving(false);
-      return;
-    }
-
     try {
       if (isEdit) {
         await snippetsAPI.update(id, formData);
+        toast.success('Snippet updated!');
       } else {
-        await snippetsAPI.create(formData);
+        const res = await snippetsAPI.create(formData);
+        toast.success('Snippet created!');
+        navigate(`/snippets/${res.data._id}`);
+        return;
       }
-      navigate('/');
+      navigate(`/snippets/${id}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save snippet');
+      toast.error(err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || 'Failed to save snippet');
     } finally {
       setSaving(false);
     }
@@ -152,60 +111,66 @@ const SnippetEditor = () => {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-custom-orangered"></div>
-          <p className="mt-4 text-custom-grey">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center dark:bg-custom-dark-bg">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-2 border-custom-orangered border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Loading snippet...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl sm:text-3xl font-bold text-custom-black mb-6">
-        {isEdit ? 'Edit Snippet' : 'Create New Snippet'}
-      </h1>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+          {isEdit ? 'Edit Snippet' : 'Create New Snippet'}
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
+          {isEdit ? 'Update your snippet below.' : 'Share a piece of code with the community.'}
+        </p>
+      </div>
 
-      {error && (
-        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="bg-custom-white rounded-lg shadow-md p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Title */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-custom-grey mb-2">
-            Title *
+          <label htmlFor="title" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            Title <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             id="title"
             name="title"
             required
+            maxLength={200}
             value={formData.title}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-custom-grey rounded-md focus:outline-none focus:ring-custom-orangered focus:border-custom-orangered text-custom-black dark:text-slate-100 bg-white dark:bg-slate-800"
+            placeholder="e.g. Debounce function in JavaScript"
+            className="input-style"
           />
         </div>
 
+        {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-custom-grey mb-2">
-            Description
+          <label htmlFor="description" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            Description <span className="text-slate-400 text-xs font-normal">(optional)</span>
           </label>
           <textarea
             id="description"
             name="description"
-            rows="3"
+            rows={3}
+            maxLength={1000}
             value={formData.description}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-custom-grey rounded-md focus:outline-none focus:ring-custom-orangered focus:border-custom-orangered text-custom-black dark:text-slate-100 bg-white dark:bg-slate-800"
+            placeholder="Briefly describe what this snippet does..."
+            className="input-style resize-none"
           />
         </div>
 
+        {/* Language */}
         <div>
-          <label htmlFor="language" className="block text-sm font-medium text-custom-grey mb-2">
-            Language *
+          <label htmlFor="language" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            Language <span className="text-red-500">*</span>
           </label>
           <select
             id="language"
@@ -213,115 +178,135 @@ const SnippetEditor = () => {
             required
             value={formData.language}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-custom-grey rounded-md focus:outline-none focus:ring-custom-orangered focus:border-custom-orangered capitalize text-custom-black dark:text-slate-100 bg-white dark:bg-slate-800"
+            className="input-style capitalize"
           >
-            {languages.map((lang) => (
-              <option key={lang} value={lang}>
-                {lang}
-              </option>
+            {languages.map(lang => (
+              <option key={lang} value={lang}>{lang}</option>
             ))}
           </select>
         </div>
 
+        {/* Code */}
         <div>
-          <label htmlFor="code" className="block text-sm font-medium text-custom-grey mb-2">
-            Code *
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label htmlFor="code" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Code <span className="text-red-500">*</span>
+            </label>
+            {formData.code && (
+              <button
+                type="button"
+                onClick={() => setShowPreview(!showPreview)}
+                className="text-xs text-custom-orangered hover:text-orange-600 font-medium transition-colors"
+              >
+                {showPreview ? 'Hide preview' : 'Show preview'}
+              </button>
+            )}
+          </div>
           <textarea
             id="code"
             name="code"
             required
-            rows="15"
+            rows={15}
             value={formData.code}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-custom-grey rounded-md focus:outline-none focus:ring-custom-orangered focus:border-custom-orangered font-mono text-custom-black dark:text-slate-100 bg-white dark:bg-slate-800"
+            placeholder="Paste your code here..."
+            className="input-style font-mono text-sm resize-y"
           />
-          {formData.code && (
-            <>
-              <div className="mt-4 rounded-lg overflow-hidden border border-custom-grey">
-                <div className="bg-custom-cement px-4 py-2 text-sm font-medium text-custom-black">
-                  Syntax Preview
-                </div>
-                <SyntaxHighlighter
-                  language={formData.language}
-                  style={oneDark}
-                  customStyle={{ margin: 0, borderRadius: '0 0 0.5rem 0.5rem' }}
-                  showLineNumbers={true}
-                >
-                  {formData.code}
-                </SyntaxHighlighter>
+          {formData.code && showPreview && (
+            <div className="mt-3 rounded-xl overflow-hidden border border-slate-200 dark:border-custom-dark-border animate-fade-in">
+              <div className="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-custom-dark-surface border-b border-slate-200 dark:border-custom-dark-border">
+                Preview
               </div>
-              <CodeExecutor code={formData.code} language={formData.language} />
-            </>
+              <SyntaxHighlighter
+                language={formData.language === 'other' ? 'text' : formData.language}
+                style={oneDark}
+                showLineNumbers
+                customStyle={{ margin: 0, borderRadius: '0 0 0.75rem 0.75rem', fontSize: '0.8125rem' }}
+              >
+                {formData.code}
+              </SyntaxHighlighter>
+            </div>
           )}
+          {formData.code && <CodeExecutor code={formData.code} language={formData.language} />}
         </div>
 
+        {/* Tags */}
         <div>
-          <label className="block text-sm font-medium text-custom-grey mb-2">Tags</label>
+          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            Tags <span className="text-slate-400 text-xs font-normal">(press Enter to add, max 10)</span>
+          </label>
           <input
             type="text"
             value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyPress={handleTagAdd}
-            placeholder="Press Enter to add a tag"
-            className="w-full px-3 py-2 border border-custom-grey rounded-md focus:outline-none focus:ring-custom-orangered focus:border-custom-orangered mb-2 text-custom-black dark:text-slate-100 bg-white dark:bg-slate-800"
+            onChange={e => setTagInput(e.target.value)}
+            onKeyDown={handleTagAdd}
+            placeholder="e.g. utility, async, hooks"
+            className="input-style mb-2"
           />
-          <div className="flex flex-wrap gap-2">
-            {formData.tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center px-3 py-1 bg-custom-cement text-custom-black rounded-full text-sm"
-              >
-                {tag}
-                <button
-                  type="button"
-                  onClick={() => handleTagRemove(tag)}
-                  className="ml-2 text-custom-orangered hover:text-orange-600"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
+          {formData.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {formData.tags.map(tag => (
+                <span key={tag} className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/40 rounded-full text-sm">
+                  #{tag}
+                  <button
+                    type="button"
+                    onClick={() => handleTagRemove(tag)}
+                    className="text-orange-400 hover:text-red-500 transition-colors leading-none"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-custom-grey gap-4">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isPublic"
-              name="isPublic"
-              checked={formData.isPublic}
-              onChange={handleChange}
-              className="h-5 w-5 text-custom-orangered focus:ring-custom-orangered border-custom-grey rounded cursor-pointer"
-            />
-            <label htmlFor="isPublic" className="ml-3 block text-sm font-medium text-custom-black dark:text-slate-200 cursor-pointer">
-              {formData.isPublic ? 'Public' : 'Private'} - {formData.isPublic ? 'Visible to everyone' : 'Only visible to you'}
-            </label>
+        {/* Visibility toggle */}
+        <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-custom-dark-border bg-slate-50 dark:bg-custom-dark-surface">
+          <div>
+            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              {formData.isPublic ? '🌐 Public snippet' : '🔒 Private snippet'}
+            </div>
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {formData.isPublic ? 'Visible to everyone on the platform' : 'Only visible to you'}
+            </div>
           </div>
-          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-            formData.isPublic
-              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-          }`}>
-            {formData.isPublic ? 'Public' : 'Private'}
-          </span>
-        </div>
-
-        <div className="flex flex-col sm:flex-row justify-end gap-3 sm:space-x-4">
           <button
             type="button"
-            onClick={() => navigate('/')}
-            className="px-4 py-2 border border-custom-grey rounded-md text-custom-grey hover:bg-custom-cement"
+            role="switch"
+            aria-checked={formData.isPublic}
+            onClick={() => setFormData(f => ({ ...f, isPublic: !f.isPublic }))}
+            className={`relative w-11 h-6 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-custom-orangered/40 ${
+              formData.isPublic ? 'gradient-bg' : 'bg-slate-200 dark:bg-slate-700'
+            }`}
+          >
+            <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-200 ${
+              formData.isPublic ? 'left-5' : 'left-0.5'
+            }`} />
+          </button>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="btn-secondary"
           >
             Cancel
           </button>
           <button
             type="submit"
+            id="snippet-save"
             disabled={saving}
-            className="px-4 py-2 bg-custom-orangered text-custom-white rounded-md hover:bg-orange-600 disabled:opacity-50"
+            className="btn-primary"
           >
-            {saving ? 'Saving...' : isEdit ? 'Update' : 'Create'}
+            {saving ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Saving...
+              </>
+            ) : (isEdit ? 'Update Snippet' : 'Create Snippet')}
           </button>
         </div>
       </form>

@@ -1,46 +1,47 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { snippetsAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import SnippetCard from '../components/SnippetCard';
+import { useToast } from '../context/ToastContext';
+
+const LANGUAGES = [
+  'javascript', 'python', 'java', 'typescript', 'cpp', 'c',
+  'csharp', 'go', 'rust', 'php', 'html', 'css', 'sql',
+];
+
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'Newest' },
+  { value: 'oldest', label: 'Oldest' },
+  { value: 'views', label: 'Most Viewed' },
+  { value: 'likes', label: 'Most Liked' },
+  { value: 'forks', label: 'Most Forked' },
+];
 
 const Home = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [snippets, setSnippets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    language: '',
-    page: 1,
-    limit: 12,
-  });
+  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'mine'
+  const [filters, setFilters] = useState({ language: '', page: 1, limit: 12, sort: 'newest' });
   const [pagination, setPagination] = useState({});
 
-  const languages = [
-    'javascript',
-    'python',
-    'java',
-    'typescript',
-    'cpp',
-    'c',
-    'csharp',
-    'go',
-    'rust',
-    'php',
-    'html',
-    'css',
-    'sql',
-  ];
-
   useEffect(() => {
-    document.title = 'Home | Rayulu Mukku';
+    document.title = 'Code Snippet Manager — Find, save and share code';
   }, []);
 
   useEffect(() => {
     fetchSnippets();
-  }, [filters]);
+  }, [filters, activeTab]);
 
   const fetchSnippets = async () => {
     setLoading(true);
     try {
-      const response = await snippetsAPI.getAll(filters);
+      const params = { ...filters };
+      const response = activeTab === 'mine' && user
+        ? await snippetsAPI.getMy(params)
+        : await snippetsAPI.getAll(params);
       setSnippets(response.data.snippets);
       setPagination({
         totalPages: response.data.totalPages,
@@ -48,110 +49,226 @@ const Home = () => {
         total: response.data.total,
       });
     } catch (error) {
+      toast.error('Failed to load snippets');
       console.error('Error fetching snippets:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLanguageFilter = (language) => {
-    setFilters({ ...filters, language: filters.language === language ? '' : language, page: 1 });
+  const handleSnippetDeleted = (deletedId) => {
+    setSnippets(prev => prev.filter(s => s._id !== deletedId));
+    toast.success('Snippet deleted');
+  };
+
+  const handleSnippetUpdated = (updatedSnippet) => {
+    setSnippets(prev => prev.map(s => s._id === updatedSnippet._id ? updatedSnippet : s));
+  };
+
+  const handleLikeToggled = (snippetId, liked, likeCount) => {
+    setSnippets(prev => prev.map(s =>
+      s._id === snippetId ? { ...s, isLiked: liked, likeCount } : s
+    ));
+  };
+
+  const handleLanguageFilter = (lang) => {
+    setFilters(f => ({ ...f, language: f.language === lang ? '' : lang, page: 1 }));
   };
 
   const handlePageChange = (page) => {
-    setFilters({ ...filters, page });
+    setFilters(f => ({ ...f, page }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-      <div className="mb-10 rounded-2xl border border-slate-200 dark:border-white/10 bg-gradient-to-br from-orange-50 to-white dark:from-slate-800/40 dark:to-slate-900 p-6 sm:p-10">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-          Find, save and share your best code snippets
-        </h1>
-        <p className="text-slate-600 dark:text-slate-300 max-w-2xl">
-          Browse a curated collection of reusable pieces of code. Organize them into collections and quickly copy when you need them.
-        </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link to="/create" className="inline-flex items-center gap-2 rounded-md bg-custom-orangered text-white px-4 py-2 text-sm font-medium hover:brightness-110 shadow-sm">
-            Create snippet
-          </Link>
-          <Link to="/collections" className="inline-flex items-center gap-2 rounded-md border border-slate-200 dark:border-white/10 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
-            Browse collections
-          </Link>
+    <div className="min-h-screen">
+      {/* Hero */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-custom-dark-surface dark:via-custom-dark-bg dark:to-custom-dark-surface border-b border-slate-200 dark:border-custom-dark-border">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-32 -right-32 w-80 h-80 bg-gradient-to-br from-orange-400/15 to-red-400/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-gradient-to-tr from-orange-300/10 to-red-300/15 rounded-full blur-3xl" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+          <div className="max-w-2xl animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-semibold mb-4 border border-orange-200 dark:border-orange-800/40">
+              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+              Developer-first snippet manager
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white mb-4 leading-tight">
+              Find, save and share<br />
+              <span className="gradient-text">your best code</span>
+            </h1>
+            <p className="text-slate-600 dark:text-slate-300 text-lg mb-8 leading-relaxed">
+              A curated collection of reusable code snippets. Organize into collections, fork others' work, and share with the community.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {user ? (
+                <Link to="/create" className="btn-primary">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <line x1={12} y1={5} x2={12} y2={19} /><line x1={5} y1={12} x2={19} y2={12} />
+                  </svg>
+                  Create snippet
+                </Link>
+              ) : (
+                <Link to="/register" className="btn-primary">Get started free</Link>
+              )}
+              <Link to="/search" className="btn-secondary">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <circle cx={11} cy={11} r={7} /><line x1={21} y1={21} x2={16.65} y2={16.65} />
+                </svg>
+                Browse all
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="mb-8">
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => handleLanguageFilter('')}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition ${
-              filters.language === ''
-                ? 'bg-custom-orangered text-white border-transparent'
-                : 'border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            All
-          </button>
-          {languages.map((lang) => (
+      {/* Main content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Tabs + Sort controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-custom-dark-surface rounded-xl w-fit">
             <button
-              key={lang}
-              onClick={() => handleLanguageFilter(lang)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium capitalize border transition ${
-                filters.language === lang
-                  ? 'bg-custom-orangered text-white border-transparent'
-                  : 'border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+              onClick={() => { setActiveTab('all'); setFilters(f => ({ ...f, page: 1 })); }}
+              className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                activeTab === 'all'
+                  ? 'bg-white dark:bg-custom-dark-card text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              {lang}
+              All Snippets
             </button>
-          ))}
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-60 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 animate-pulse" />
-          ))}
-        </div>
-      ) : snippets.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-slate-600 dark:text-slate-300 text-lg">No snippets found</p>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {snippets.map((snippet) => (
-              <SnippetCard key={snippet._id} snippet={snippet} />
-            ))}
+            {user && (
+              <button
+                onClick={() => { setActiveTab('mine'); setFilters(f => ({ ...f, page: 1 })); }}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                  activeTab === 'mine'
+                    ? 'bg-white dark:bg-custom-dark-card text-slate-900 dark:text-white shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                My Snippets
+              </button>
+            )}
           </div>
 
-          {pagination.totalPages > 1 && (
-            <div className="mt-8 flex justify-center items-center gap-2">
+          {/* Sort dropdown */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="sort-select" className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">Sort by</label>
+            <select
+              id="sort-select"
+              value={filters.sort}
+              onChange={(e) => setFilters(f => ({ ...f, sort: e.target.value, page: 1 }))}
+              className="text-sm px-3 py-2 rounded-lg border border-slate-200 dark:border-custom-dark-border bg-white dark:bg-custom-dark-surface text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-custom-orangered/40"
+            >
+              {SORT_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Language filters */}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleLanguageFilter('')}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-150 ${
+                filters.language === ''
+                  ? 'bg-custom-orangered text-white border-transparent shadow-sm shadow-orange-500/30'
+                  : 'border-slate-200 dark:border-custom-dark-border text-slate-600 dark:text-slate-300 hover:border-custom-orangered/50'
+              }`}
+            >
+              All
+            </button>
+            {LANGUAGES.map(lang => (
               <button
-                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                disabled={pagination.currentPage === 1}
-                className="px-4 py-2 border border-slate-300 dark:border-white/10 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800"
+                key={lang}
+                onClick={() => handleLanguageFilter(lang)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize border transition-all duration-150 ${
+                  filters.language === lang
+                    ? 'bg-custom-orangered text-white border-transparent shadow-sm shadow-orange-500/30'
+                    : 'border-slate-200 dark:border-custom-dark-border text-slate-600 dark:text-slate-300 hover:border-custom-orangered/50'
+                }`}
               >
-                Previous
+                {lang}
               </button>
-              <span className="px-4 py-2 text-slate-600 dark:text-slate-300">
-                Page {pagination.currentPage} of {pagination.totalPages}
-              </span>
-              <button
-                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                disabled={pagination.currentPage === pagination.totalPages}
-                className="px-4 py-2 border border-slate-300 dark:border-white/10 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800"
-              >
-                Next
-              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Snippet grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-64 rounded-xl border border-slate-200 dark:border-custom-dark-border bg-slate-100 dark:bg-custom-dark-surface animate-pulse" />
+            ))}
+          </div>
+        ) : snippets.length === 0 ? (
+          <div className="text-center py-20 animate-fade-in">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">No snippets found</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">
+              {activeTab === 'mine' ? "You haven't created any snippets yet." : 'Try adjusting your filters.'}
+            </p>
+            {activeTab === 'mine' && (
+              <Link to="/create" className="btn-primary">Create your first snippet</Link>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {snippets.map(snippet => (
+                <SnippetCard
+                  key={snippet._id}
+                  snippet={snippet}
+                  onDeleted={handleSnippetDeleted}
+                  onUpdated={handleSnippetUpdated}
+                  onLikeToggled={handleLikeToggled}
+                />
+              ))}
             </div>
-          )}
-        </>
-      )}
+
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="mt-10 flex justify-center items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={pagination.currentPage === 1}
+                  className="btn-secondary py-2 px-4 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ← Previous
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                    const page = i + 1;
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                          pagination.currentPage === page
+                            ? 'gradient-bg text-white shadow-md'
+                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-custom-dark-surface'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={pagination.currentPage === pagination.totalPages}
+                  className="btn-secondary py-2 px-4 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
