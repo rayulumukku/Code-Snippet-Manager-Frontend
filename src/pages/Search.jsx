@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { searchAPI } from '../services/api';
 import SnippetCard from '../components/SnippetCard';
+import { FiSearch } from 'react-icons/fi';
 
 const Search = () => {
   const [query, setQuery] = useState('');
@@ -132,7 +133,7 @@ const Search = () => {
                   type="text"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={handleTagAdd}
+                  onKeyDown={handleTagAdd}
                   placeholder="Press Enter to add a tag"
                   className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-custom-orangered focus:border-custom-orangered mb-2 bg-white dark:bg-slate-800 text-custom-black dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                 />
@@ -174,7 +175,9 @@ const Search = () => {
         </div>
       ) : results.length === 0 && (query || language || tags.length > 0) ? (
         <div className="text-center py-12">
-          <div className="text-5xl mb-4">🔍</div>
+          <div className="flex justify-center text-slate-300 dark:text-slate-600 mb-4">
+            <FiSearch className="text-5xl" />
+          </div>
           <p className="text-custom-grey dark:text-slate-300 text-lg">No results found</p>
           <p className="text-custom-grey dark:text-slate-400 text-sm mt-2">Try adjusting your search criteria</p>
         </div>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { collectionsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { hasProfanity } from '../utils/profanityFilter';
+import { FiFolder } from 'react-icons/fi';
 
 const Collections = () => {
   const { user } = useAuth();
@@ -164,8 +165,10 @@ const Collections = () => {
       </div>
 
       {collections.length === 0 ? (
-        <div className="text-center py-12 bg-custom-white dark:bg-custom-dark-card rounded-lg shadow-md">
-          <div className="text-6xl mb-4">📁</div>
+        <div className="text-center py-12 bg-custom-white dark:bg-custom-dark-card rounded-lg shadow-md border border-slate-200 dark:border-white/10">
+          <div className="flex justify-center text-slate-300 dark:text-slate-600 mb-4">
+            <FiFolder className="text-6xl" />
+          </div>
           <p className="text-custom-grey dark:text-slate-300 text-lg mb-2">No collections yet</p>
           <p className="text-custom-grey dark:text-slate-400 text-sm mb-4">
             Create collections to organize your code snippets into folders

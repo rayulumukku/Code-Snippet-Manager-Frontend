@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { snippetsAPI } from '../services/api';
+import { FiFileText, FiGlobe, FiEye, FiHeart, FiCode } from 'react-icons/fi';
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -70,10 +71,10 @@ const Profile = () => {
   const avatarInitials = user?.username?.slice(0, 2).toUpperCase() || '??';
 
   const statCards = [
-    { label: 'Total Snippets', value: stats.total, icon: '📝' },
-    { label: 'Public', value: stats.public, icon: '🌐' },
-    { label: 'Total Views', value: stats.totalViews, icon: '👁️' },
-    { label: 'Total Likes', value: stats.totalLikes, icon: '❤️' },
+    { label: 'Total Snippets', value: stats.total, icon: <FiFileText className="text-2xl text-custom-orangered mx-auto" /> },
+    { label: 'Public', value: stats.public, icon: <FiGlobe className="text-2xl text-emerald-500 mx-auto" /> },
+    { label: 'Total Views', value: stats.totalViews, icon: <FiEye className="text-2xl text-sky-500 mx-auto" /> },
+    { label: 'Total Likes', value: stats.totalLikes, icon: <FiHeart className="text-2xl text-red-500 mx-auto" /> },
   ];
 
   return (
@@ -151,7 +152,9 @@ const Profile = () => {
             </div>
           ) : snippets.length === 0 ? (
             <div className="text-center py-20 animate-fade-in">
-              <div className="text-6xl mb-4">✨</div>
+              <div className="flex justify-center text-slate-300 dark:text-slate-600 mb-4">
+                <FiCode className="text-6xl" />
+              </div>
               <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">No snippets yet</h3>
               <p className="text-slate-500 dark:text-slate-400 mb-6">Create your first snippet to get started</p>
               <Link to="/create" className="btn-primary">Create Snippet</Link>

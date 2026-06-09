@@ -6,6 +6,7 @@ import { snippetsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import CodeExecutor from '../components/CodeExecutor';
+import { FiGlobe, FiLock } from 'react-icons/fi';
 
 const languages = [
   'javascript','python','java','typescript','cpp','c','csharp','ruby',
@@ -264,8 +265,9 @@ const SnippetEditor = () => {
         {/* Visibility toggle */}
         <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-custom-dark-border bg-slate-50 dark:bg-custom-dark-surface">
           <div>
-            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              {formData.isPublic ? '🌐 Public snippet' : '🔒 Private snippet'}
+            <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">
+              {formData.isPublic ? <FiGlobe className="w-4 h-4 text-emerald-500" /> : <FiLock className="w-4 h-4 text-slate-400" />}
+              {formData.isPublic ? 'Public snippet' : 'Private snippet'}
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               {formData.isPublic ? 'Visible to everyone on the platform' : 'Only visible to you'}

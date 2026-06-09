@@ -6,6 +6,7 @@ import { snippetsAPI, collectionsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import CodeExecutor from '../components/CodeExecutor';
+import { FiFrown, FiFolder, FiGlobe, FiLock } from 'react-icons/fi';
 
 const SnippetDetail = () => {
   const { id } = useParams();
@@ -130,7 +131,9 @@ const SnippetDetail = () => {
   if (error || !snippet) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center animate-fade-in">
-        <div className="text-6xl mb-4">😕</div>
+        <div className="flex justify-center text-slate-400 mb-4">
+          <FiFrown className="text-6xl" />
+        </div>
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Snippet not found</h2>
         <p className="text-slate-500 dark:text-slate-400 mb-6">{error || 'This snippet may have been deleted or is private.'}</p>
         <Link to="/" className="btn-primary">← Back to home</Link>
@@ -184,12 +187,13 @@ const SnippetDetail = () => {
 
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-sm font-semibold rounded-full ${
                 snippet.isPublic
                   ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
               }`}>
-                {snippet.isPublic ? '🌐 Public' : '🔒 Private'}
+                {snippet.isPublic ? <FiGlobe className="w-3.5 h-3.5" /> : <FiLock className="w-3.5 h-3.5" />}
+                {snippet.isPublic ? 'Public' : 'Private'}
               </span>
               <span className="lang-badge capitalize">{snippet.language}</span>
             </div>
@@ -326,7 +330,9 @@ const SnippetDetail = () => {
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Add to Collection</h2>
             {userCollections.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-5xl mb-3">📁</div>
+                <div className="flex justify-center text-slate-400 mb-3">
+                  <FiFolder className="text-5xl" />
+                </div>
                 <p className="text-slate-500 dark:text-slate-400 mb-4">No collections yet.</p>
                 <Link to="/collections" onClick={() => setShowAddToCollection(false)} className="btn-primary text-sm">Create Collection</Link>
               </div>

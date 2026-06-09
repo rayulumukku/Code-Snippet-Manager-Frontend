@@ -1,10 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useAuth } from '../context/AuthContext';
 import { snippetsAPI, collectionsAPI } from '../services/api';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../context/ToastContext';
+import LazySyntaxHighlighter from './LazySyntaxHighlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useIntersectionObserver } from '../utils/useIntersectionObserver';
+import { FiFolder } from 'react-icons/fi';
 
 const LangColor = {
   javascript: 'from-yellow-400/20 to-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700/40',
@@ -28,6 +30,9 @@ const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled }) => {
   const [showAddToCollection, setShowAddToCollection] = useState(false);
   const [userCollections, setUserCollections] = useState([]);
   const [addingToCollection, setAddingToCollection] = useState(false);
+
+  const containerRef = useRef(null);
+  const isIntersecting = useIntersectionObserver(containerRef, { triggerOnce: true });
 
   const isOwner = user && snippet.author?._id === user._id;
   const langClass = LangColor[snippet.language] || defaultLangColor;
@@ -183,15 +188,24 @@ const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled }) => {
         )}
 
         {/* Code preview */}
-        <div className="relative rounded-xl overflow-hidden ring-1 ring-slate-900/5 dark:ring-white/5 mb-4 group/code">
-          <SyntaxHighlighter
-            language={snippet.language === 'other' ? 'text' : snippet.language}
-            style={oneDark}
-            customStyle={{ margin: 0, borderRadius: '0.75rem', fontSize: '0.75rem', maxHeight: '120px', overflow: 'hidden' }}
-            showLineNumbers={false}
-          >
-            {codePreview}
-          </SyntaxHighlighter>
+        <div ref={containerRef} className="relative rounded-xl overflow-hidden ring-1 ring-slate-900/5 dark:ring-white/5 mb-4 group/code min-h-[90px]">
+          {isIntersecting ? (
+            <LazySyntaxHighlighter
+              language={snippet.language === 'other' ? 'text' : snippet.language}
+              style={oneDark}
+              customStyle={{ margin: 0, borderRadius: '0.75rem', fontSize: '0.75rem', maxHeight: '120px', overflow: 'hidden' }}
+              showLineNumbers={false}
+            >
+              {codePreview}
+            </LazySyntaxHighlighter>
+          ) : (
+            <pre
+              className="font-mono text-xs p-4 bg-slate-950 text-slate-300 rounded-xl overflow-hidden leading-relaxed whitespace-pre font-normal select-none"
+              style={{ margin: 0, borderRadius: '0.75rem', fontSize: '0.75rem', maxHeight: '120px', overflow: 'hidden' }}
+            >
+              <code>{codePreview}</code>
+            </pre>
+          )}
           <button
             onClick={handleCopy}
             className="absolute top-2 right-2 p-1.5 bg-slate-800/80 hover:bg-slate-700 text-white rounded-lg opacity-0 group-hover/code:opacity-100 transition-all duration-150"
@@ -303,7 +317,9 @@ const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled }) => {
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Add to Collection</h2>
             {userCollections.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-5xl mb-3">📁</div>
+                <div className="flex justify-center text-slate-400 mb-3">
+                  <FiFolder className="text-5xl" />
+                </div>
                 <p className="text-slate-500 dark:text-slate-400 mb-4">No collections yet.</p>
                 <Link
                   to="/collections"

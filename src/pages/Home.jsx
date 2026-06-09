@@ -4,6 +4,7 @@ import { snippetsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import SnippetCard from '../components/SnippetCard';
 import { useToast } from '../context/ToastContext';
+import { FiSearch } from 'react-icons/fi';
 
 const LANGUAGES = [
   'javascript', 'python', 'java', 'typescript', 'cpp', 'c',
@@ -206,7 +207,9 @@ const Home = () => {
           </div>
         ) : snippets.length === 0 ? (
           <div className="text-center py-20 animate-fade-in">
-            <div className="text-6xl mb-4">🔍</div>
+            <div className="flex justify-center text-slate-300 dark:text-slate-600 mb-4">
+              <FiSearch className="text-6xl" />
+            </div>
             <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">No snippets found</h3>
             <p className="text-slate-500 dark:text-slate-400 mb-6">
               {activeTab === 'mine' ? "You haven't created any snippets yet." : 'Try adjusting your filters.'}

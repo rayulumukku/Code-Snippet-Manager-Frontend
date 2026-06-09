@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -5,16 +6,17 @@ import { ToastProvider } from './context/ToastContext';
 import Navbar from './components/Navbar';
 import Toast from './components/Toast';
 import ProtectedRoute from './components/ProtectedRoute';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import SnippetDetail from './pages/SnippetDetail';
-import SnippetEditor from './pages/SnippetEditor';
-import Search from './pages/Search';
-import Collections from './pages/Collections';
-import CollectionDetail from './pages/CollectionDetail';
-import Profile from './pages/Profile';
-import NotFound from './pages/NotFound';
+
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const SnippetDetail = lazy(() => import('./pages/SnippetDetail'));
+const SnippetEditor = lazy(() => import('./pages/SnippetEditor'));
+const Search = lazy(() => import('./pages/Search'));
+const Collections = lazy(() => import('./pages/Collections'));
+const CollectionDetail = lazy(() => import('./pages/CollectionDetail'));
+const Profile = lazy(() => import('./pages/Profile'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 function App() {
   return (
@@ -24,25 +26,31 @@ function App() {
           <Router>
             <div className="min-h-screen bg-white text-slate-900 dark:bg-custom-dark-bg dark:text-custom-dark-text antialiased selection:bg-orange-200/60 selection:text-slate-900">
               <Navbar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/collections" element={<Collections />} />
-                <Route path="/collections/:id" element={<CollectionDetail />} />
-                <Route path="/snippets/:id" element={<SnippetDetail />} />
-                <Route path="/profile" element={
-                  <ProtectedRoute><Profile /></ProtectedRoute>
-                } />
-                <Route path="/create" element={
-                  <ProtectedRoute><SnippetEditor /></ProtectedRoute>
-                } />
-                <Route path="/snippets/:id/edit" element={
-                  <ProtectedRoute><SnippetEditor /></ProtectedRoute>
-                } />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <Suspense fallback={
+                <div className="min-h-[60vh] flex items-center justify-center">
+                  <div className="w-10 h-10 border-2 border-custom-orangered border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/collections" element={<Collections />} />
+                  <Route path="/collections/:id" element={<CollectionDetail />} />
+                  <Route path="/snippets/:id" element={<SnippetDetail />} />
+                  <Route path="/profile" element={
+                    <ProtectedRoute><Profile /></ProtectedRoute>
+                  } />
+                  <Route path="/create" element={
+                    <ProtectedRoute><SnippetEditor /></ProtectedRoute>
+                  } />
+                  <Route path="/snippets/:id/edit" element={
+                    <ProtectedRoute><SnippetEditor /></ProtectedRoute>
+                  } />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
               <Toast />
             </div>
           </Router>
