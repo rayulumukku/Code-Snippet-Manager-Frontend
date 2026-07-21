@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import SearchModal from './SearchModal';
-import { FiSearch } from 'react-icons/fi';
+import CommandPalette from './CommandPalette';
+import { FiSearch, FiCommand } from 'react-icons/fi';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -353,7 +353,7 @@ const Navbar = () => {
         )}
       </div>
 
-      <SearchModal
+      <CommandPalette
         isOpen={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}
       />
