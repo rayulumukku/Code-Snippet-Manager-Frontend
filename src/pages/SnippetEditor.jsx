@@ -6,6 +6,7 @@ import { snippetsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import CodeExecutor from '../components/CodeExecutor';
+import TagInput from '../components/TagInput';
 import { FiGlobe, FiLock } from 'react-icons/fi';
 
 const languages = [
@@ -31,7 +32,6 @@ const SnippetEditor = () => {
     tags: [],
     isPublic: false,
   });
-  const [tagInput, setTagInput] = useState('');
   const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
@@ -72,21 +72,6 @@ const SnippetEditor = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
-  };
-
-  const handleTagAdd = (e) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      const trimmed = tagInput.trim().toLowerCase();
-      if (!formData.tags.includes(trimmed) && formData.tags.length < 10) {
-        setFormData(f => ({ ...f, tags: [...f.tags, trimmed] }));
-      }
-      setTagInput('');
-    }
-  };
-
-  const handleTagRemove = (tag) => {
-    setFormData(f => ({ ...f, tags: f.tags.filter(t => t !== tag) }));
   };
 
   const handleSubmit = async (e) => {
@@ -234,32 +219,12 @@ const SnippetEditor = () => {
         {/* Tags */}
         <div>
           <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-            Tags <span className="text-slate-400 text-xs font-normal">(press Enter to add, max 10)</span>
+            Tags <span className="text-slate-400 text-xs font-normal">(optional, max 10)</span>
           </label>
-          <input
-            type="text"
-            value={tagInput}
-            onChange={e => setTagInput(e.target.value)}
-            onKeyDown={handleTagAdd}
-            placeholder="e.g. utility, async, hooks"
-            className="input-style mb-2"
+          <TagInput
+            tags={formData.tags}
+            onChange={(tags) => setFormData(f => ({ ...f, tags }))}
           />
-          {formData.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {formData.tags.map(tag => (
-                <span key={tag} className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/40 rounded-full text-sm">
-                  #{tag}
-                  <button
-                    type="button"
-                    onClick={() => handleTagRemove(tag)}
-                    className="text-orange-400 hover:text-red-500 transition-colors leading-none"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Visibility toggle */}

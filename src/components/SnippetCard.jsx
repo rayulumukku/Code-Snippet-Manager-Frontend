@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext';
 import LazySyntaxHighlighter from './LazySyntaxHighlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useIntersectionObserver } from '../utils/useIntersectionObserver';
+import TagChip from './TagChip';
 import { FiFolder } from 'react-icons/fi';
 
 const LangColor = {
@@ -17,7 +18,7 @@ const LangColor = {
 };
 const defaultLangColor = 'from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800/40';
 
-const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled }) => {
+const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled, onTagClick }) => {
   const codePreview = snippet.code ? snippet.code.substring(0, 150) : '';
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -297,9 +298,18 @@ const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled }) => {
         {snippet.tags?.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {snippet.tags.slice(0, 4).map((tag, i) => (
-              <span key={i} className="tag-badge">#{tag}</span>
+              <TagChip
+                key={i}
+                tag={tag}
+                onClick={onTagClick ? () => onTagClick(tag) : () => navigate(`/search?tags=${encodeURIComponent(tag)}`)}
+                size="sm"
+              />
             ))}
-            {snippet.tags.length > 4 && <span className="tag-badge">+{snippet.tags.length - 4}</span>}
+            {snippet.tags.length > 4 && (
+              <span className="text-xs px-2 py-0.5 font-medium rounded-full bg-slate-100 dark:bg-custom-dark-surface text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-custom-dark-border">
+                +{snippet.tags.length - 4}
+              </span>
+            )}
           </div>
         )}
       </div>

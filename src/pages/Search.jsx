@@ -1,18 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { searchAPI } from '../services/api';
 import SnippetCard from '../components/SnippetCard';
+import TagInput from '../components/TagInput';
+import TagFilter from '../components/TagFilter';
+import TagChip from '../components/TagChip';
 import { FiSearch, FiSliders, FiFolder, FiTag, FiClock, FiX } from 'react-icons/fi';
 
 const Search = () => {
-  const [query, setQuery] = useState('');
-  const [language, setLanguage] = useState('');
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get('q') || '');
+  const [language, setLanguage] = useState(searchParams.get('language') || '');
+  const [tags, setTags] = useState(() => {
+    const paramTags = searchParams.get('tags');
+    return paramTags ? paramTags.split(',').map(t => t.trim()).filter(Boolean) : [];
+  });
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [type, setType] = useState('snippets');
-  const [showFilters, setShowFilters] = useState(false);
+  const [type, setType] = useState(searchParams.get('type') || 'snippets');
+  const [showFilters, setShowFilters] = useState(Boolean(searchParams.get('tags') || searchParams.get('language')));
 
   useEffect(() => {
     document.title = 'Search Snippets & Collections | Code Snippet Manager';
@@ -33,6 +39,17 @@ const Search = () => {
     'css',
     'sql',
   ];
+
+  useEffect(() => {
+    const newParams = {};
+    if (query) newParams.q = query;
+    if (type !== 'snippets') newParams.type = type;
+    if (language) newParams.language = language;
+    if (tags.length > 0) newParams.tags = tags.join(',');
+    setSearchParams(newParams, { replace: true });
+
+    handleSearch();
+  }, [query, type, language, tags]);
 
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
@@ -56,27 +73,9 @@ const Search = () => {
     }
   };
 
-  const handleTagAdd = (e) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      const cleaned = tagInput.trim().toLowerCase();
-      if (!tags.includes(cleaned)) {
-        setTags([...tags, cleaned]);
-      }
-      setTagInput('');
-    }
+  const handleTagToggle = (tag) => {
+    setTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
   };
-
-  const handleTagRemove = (tag) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
-
-  // Automatically trigger search when type switches to collections (since collections don't use language/tags filters)
-  useEffect(() => {
-    if (query || tags.length > 0 || language) {
-      handleSearch();
-    }
-  }, [type]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">
@@ -191,44 +190,21 @@ const Search = () => {
               </div>
 
               {/* Tags Input & Badges */}
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Filter by Tags <span className="text-slate-400 dark:text-slate-500 font-normal">(Press Enter to add)</span>
+                  Filter by Tags
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <FiTag className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={handleTagAdd}
-                    placeholder="Type tag and press enter"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-custom-dark-surface/50 border border-slate-200 dark:border-custom-dark-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-custom-orangered/30 focus:border-custom-orangered text-slate-900 dark:text-white transition-all duration-150 placeholder-slate-400 dark:placeholder-slate-500 text-sm shadow-inner"
-                  />
-                </div>
-
-                {/* Tag Pills */}
-                {tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-3 animate-fade-in">
-                    {tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-orange-50 dark:bg-orange-950/20 text-custom-orangered dark:text-orange-400 rounded-full text-xs font-semibold border border-orange-200/40 dark:border-orange-900/40"
-                      >
-                        #{tag}
-                        <button
-                          type="button"
-                          onClick={() => handleTagRemove(tag)}
-                          className="hover:text-red-500 transition-colors"
-                        >
-                          <FiX className="w-3.5 h-3.5" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <TagInput
+                  tags={tags}
+                  onChange={(newTags) => setTags(newTags)}
+                  placeholder="Type tag and press enter or select below..."
+                />
+                <TagFilter
+                  selectedTags={tags}
+                  onTagToggle={handleTagToggle}
+                  onClearAll={() => setTags([])}
+                  className="mt-4"
+                />
               </div>
             </div>
           )}
@@ -239,15 +215,12 @@ const Search = () => {
       {results.length > 0 && !loading && (
         <div className="flex items-center justify-between mb-5 px-1 animate-fade-in">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-            Matches Found ({results.length})
+            {type === 'snippets' ? 'Snippets' : 'Collections'} ({results.length})
           </h2>
-          <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <FiClock className="w-3.5 h-3.5" /> Queries resolved instantly
-          </span>
         </div>
       )}
 
-      {/* Results Rendering */}
+      {/* Results Grid / Loading State / Empty State */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -257,22 +230,16 @@ const Search = () => {
             />
           ))}
         </div>
-      ) : results.length === 0 && (query || language || tags.length > 0) ? (
-        <div className="text-center py-16 bg-white dark:bg-custom-dark-card border border-slate-200 dark:border-custom-dark-border/80 rounded-3xl shadow-sm animate-fade-in">
-          <div className="flex justify-center text-slate-300 dark:text-slate-600 mb-4">
-            <FiFolder className="text-6xl" />
-          </div>
-          <p className="text-slate-700 dark:text-slate-300 text-lg font-semibold">No results found</p>
-          <p className="text-slate-400 dark:text-slate-500 text-sm mt-1 max-w-xs mx-auto">
-            We couldn't find matches for your search. Try refining your keywords or filters.
-          </p>
-        </div>
       ) : results.length > 0 ? (
         <div>
           {type === 'snippets' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {results.map((snippet) => (
-                <SnippetCard key={snippet._id} snippet={snippet} />
+                <SnippetCard
+                  key={snippet._id}
+                  snippet={snippet}
+                  onTagClick={handleTagToggle}
+                />
               ))}
             </div>
           ) : (
@@ -315,6 +282,16 @@ const Search = () => {
               ))}
             </div>
           )}
+        </div>
+      ) : (query || language || tags.length > 0) ? (
+        <div className="text-center py-16 bg-white dark:bg-custom-dark-card border border-slate-200 dark:border-custom-dark-border/80 rounded-3xl shadow-sm animate-fade-in">
+          <div className="flex justify-center text-slate-300 dark:text-slate-600 mb-4">
+            <FiFolder className="text-6xl" />
+          </div>
+          <p className="text-slate-700 dark:text-slate-300 text-lg font-semibold">No results found</p>
+          <p className="text-slate-400 dark:text-slate-500 text-sm mt-1 max-w-xs mx-auto">
+            We couldn't find matches for your search. Try refining your keywords or filters.
+          </p>
         </div>
       ) : (
         /* Initial Search Page Info State */

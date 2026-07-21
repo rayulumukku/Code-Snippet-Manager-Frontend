@@ -6,6 +6,7 @@ import { snippetsAPI, collectionsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import CodeExecutor from '../components/CodeExecutor';
+import TagChip from '../components/TagChip';
 import { FiFrown, FiFolder, FiGlobe, FiLock } from 'react-icons/fi';
 
 const SnippetDetail = () => {
@@ -211,7 +212,12 @@ const SnippetDetail = () => {
           {snippet.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {snippet.tags.map((tag, i) => (
-                <span key={i} className="tag-badge">#{tag}</span>
+                <TagChip
+                  key={i}
+                  tag={tag}
+                  onClick={() => navigate(`/search?tags=${encodeURIComponent(tag)}`)}
+                  size="md"
+                />
               ))}
             </div>
           )}

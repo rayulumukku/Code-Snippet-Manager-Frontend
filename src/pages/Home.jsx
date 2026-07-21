@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { snippetsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import SnippetCard from '../components/SnippetCard';
+import TagFilter from '../components/TagFilter';
 import { useToast } from '../context/ToastContext';
 import { FiSearch } from 'react-icons/fi';
 
@@ -25,7 +26,7 @@ const Home = () => {
   const [snippets, setSnippets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'mine'
-  const [filters, setFilters] = useState({ language: '', page: 1, limit: 12, sort: 'newest' });
+  const [filters, setFilters] = useState({ language: '', tags: '', page: 1, limit: 12, sort: 'newest' });
   const [pagination, setPagination] = useState({});
 
   useEffect(() => {
@@ -74,6 +75,20 @@ const Home = () => {
 
   const handleLanguageFilter = (lang) => {
     setFilters(f => ({ ...f, language: f.language === lang ? '' : lang, page: 1 }));
+  };
+
+  const handleTagToggle = (tag) => {
+    setFilters(f => {
+      const currentTags = f.tags ? f.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+      const updated = currentTags.includes(tag)
+        ? currentTags.filter(t => t !== tag)
+        : [...currentTags, tag];
+      return { ...f, tags: updated.join(','), page: 1 };
+    });
+  };
+
+  const handleClearTags = () => {
+    setFilters(f => ({ ...f, tags: '', page: 1 }));
   };
 
   const handlePageChange = (page) => {
@@ -165,6 +180,14 @@ const Home = () => {
           </div>
         </div>
 
+        {/* Tag filters */}
+        <TagFilter
+          selectedTags={filters.tags ? filters.tags.split(',').map(t => t.trim()).filter(Boolean) : []}
+          onTagToggle={handleTagToggle}
+          onClearAll={handleClearTags}
+          className="mb-6 p-4 bg-white dark:bg-custom-dark-card border border-slate-200 dark:border-custom-dark-border rounded-2xl shadow-sm"
+        />
+
         {/* Language filters */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-2">
@@ -224,6 +247,7 @@ const Home = () => {
                   onDeleted={handleSnippetDeleted}
                   onUpdated={handleSnippetUpdated}
                   onLikeToggled={handleLikeToggled}
+                  onTagClick={handleTagToggle}
                 />
               ))}
             </div>
