@@ -121,6 +121,8 @@ export const collectionsAPI = {
 // ─── Search API ───────────────────────────────────────────────────────────────
 export const searchAPI = {
   search: (params) => api.get('/search', { params }),
+  getSuggestions: (params) => api.get('/search/suggestions', { params }),
+  getTrending: () => api.get('/search/trending'),
 };
 
 export default api;

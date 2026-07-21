@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import SearchModal from './SearchModal';
+import { FiSearch } from 'react-icons/fi';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -9,6 +11,19 @@ const Navbar = () => {
   const { darkMode, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchModalOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -87,6 +102,20 @@ const Navbar = () => {
 
           {/* Right side controls (Desktop actions vs Hamburger Menu) */}
           <div className="flex items-center gap-2">
+            {/* Quick Search Button */}
+            <button
+              type="button"
+              onClick={() => setSearchModalOpen(true)}
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-custom-dark-surface hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              title="Quick Search (Cmd+K or Ctrl+K)"
+            >
+              <FiSearch className="w-3.5 h-3.5 text-custom-orangered" />
+              <span>Quick Search</span>
+              <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-custom-dark-card border border-slate-200 dark:border-custom-dark-border rounded shadow-sm">
+                ⌘K
+              </kbd>
+            </button>
+
             {/* Theme toggle (Desktop only) */}
             <button
               onClick={toggleTheme}
@@ -323,6 +352,11 @@ const Navbar = () => {
           </div>
         )}
       </div>
+
+      <SearchModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+      />
     </nav>
   );
 };
