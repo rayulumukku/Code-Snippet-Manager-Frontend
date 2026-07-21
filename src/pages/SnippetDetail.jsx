@@ -9,7 +9,8 @@ import CodeExecutor from '../components/CodeExecutor';
 import TagChip from '../components/TagChip';
 import FavoriteButton from '../components/FavoriteButton';
 import PinnedBadge from '../components/PinnedBadge';
-import { FiFrown, FiFolder, FiGlobe, FiLock } from 'react-icons/fi';
+import VersionHistoryDrawer from '../components/VersionHistoryDrawer';
+import { FiFrown, FiFolder, FiGlobe, FiLock, FiGitBranch } from 'react-icons/fi';
 
 const SnippetDetail = () => {
   const { id } = useParams();
@@ -26,6 +27,7 @@ const SnippetDetail = () => {
   const [showAddToCollection, setShowAddToCollection] = useState(false);
   const [userCollections, setUserCollections] = useState([]);
   const [addingToCollection, setAddingToCollection] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   useEffect(() => {
     document.title = snippet ? `${snippet.title} | Code Snippet Manager` : 'Snippet | Code Snippet Manager';
@@ -298,6 +300,17 @@ const SnippetDetail = () => {
                 {snippet.likeCount > 0 && <span className="ml-0.5">· {snippet.likeCount}</span>}
               </button>
 
+              {/* Version History Button */}
+              <button
+                type="button"
+                onClick={() => setHistoryOpen(true)}
+                className="btn-secondary text-sm flex items-center gap-1.5"
+                title="View Version History & Line Diffs"
+              >
+                <FiGitBranch className="w-4 h-4 text-orange-500" />
+                Version History
+              </button>
+
               {/* Add to collection */}
               {user && (
                 <button onClick={() => setShowAddToCollection(true)} className="btn-secondary text-sm">
@@ -387,6 +400,16 @@ const SnippetDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Version History Drawer */}
+      <VersionHistoryDrawer
+        snippetId={id}
+        currentSnippet={snippet}
+        isOpen={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        onSnippetRestored={(updated) => setSnippet(updated)}
+        isOwner={isOwner}
+      />
     </div>
   );
 };

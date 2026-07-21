@@ -140,4 +140,11 @@ export const pinnedAPI = {
   unpin: (id) => api.delete(`/snippets/${id}/pin`),
 };
 
+// ─── Version History API ──────────────────────────────────────────────────────
+export const versionsAPI = {
+  getHistory: (snippetId, params) => api.get(`/snippets/${snippetId}/history`, { params }),
+  getVersion: (snippetId, versionId) => api.get(`/snippets/${snippetId}/history/${versionId}`),
+  restore: (snippetId, versionId) => api.post(`/snippets/${snippetId}/restore/${versionId}`),
+};
+
 export default api;
