@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Toast from './components/Toast';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -51,6 +52,7 @@ function App() {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
+              <Footer />
               <Toast />
             </div>
           </Router>

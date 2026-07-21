@@ -125,4 +125,19 @@ export const searchAPI = {
   getTrending: () => api.get('/search/trending'),
 };
 
+// ─── Favorites API ────────────────────────────────────────────────────────────
+export const favoritesAPI = {
+  getFavorites: (params) => api.get('/favorites', { params }),
+  getFavoriteIds: () => api.get('/favorites/ids'),
+  favorite: (snippetId) => api.post(`/favorites/${snippetId}`),
+  unfavorite: (snippetId) => api.delete(`/favorites/${snippetId}`),
+};
+
+// ─── Pinned API ───────────────────────────────────────────────────────────────
+export const pinnedAPI = {
+  getPinned: () => api.get('/snippets/pinned'),
+  pin: (id) => api.post(`/snippets/${id}/pin`),
+  unpin: (id) => api.delete(`/snippets/${id}/pin`),
+};
+
 export default api;

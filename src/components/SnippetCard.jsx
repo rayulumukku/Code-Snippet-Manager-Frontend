@@ -1,12 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { snippetsAPI, collectionsAPI } from '../services/api';
+import { snippetsAPI, collectionsAPI, pinnedAPI } from '../services/api';
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../context/ToastContext';
 import LazySyntaxHighlighter from './LazySyntaxHighlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useIntersectionObserver } from '../utils/useIntersectionObserver';
 import TagChip from './TagChip';
+import FavoriteButton from './FavoriteButton';
+import PinnedBadge from './PinnedBadge';
 import { FiFolder } from 'react-icons/fi';
 
 const LangColor = {
@@ -140,19 +142,54 @@ const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled, onTagClick 
     }
   };
 
+  const handleTogglePin = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isOwner) return;
+    try {
+      if (snippet.isPinned) {
+        const res = await pinnedAPI.unpin(snippet._id);
+        onUpdated?.(res.data.snippet);
+        toast.success('Snippet unpinned');
+      } else {
+        const res = await pinnedAPI.pin(snippet._id);
+        onUpdated?.(res.data.snippet);
+        toast.success('Snippet pinned!');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update pin status');
+    }
+  };
+
   return (
     <div className="group bg-white dark:bg-custom-dark-card border border-slate-200 dark:border-custom-dark-border rounded-2xl shadow-sm hover:shadow-xl dark:hover:shadow-black/40 hover:-translate-y-1 transition-all duration-200 overflow-hidden animate-fade-in">
       <div className="p-5">
         {/* Header */}
         <div className="flex items-start justify-between gap-2 mb-3">
           <Link to={`/snippets/${snippet._id}`} className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 group-hover:text-custom-orangered transition-colors duration-150 truncate">
-              {snippet.title}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 group-hover:text-custom-orangered transition-colors duration-150 truncate">
+                {snippet.title}
+              </h3>
+              {snippet.isPinned && <PinnedBadge />}
+            </div>
           </Link>
           <div className="flex items-center gap-1 shrink-0">
             {isOwner && (
               <>
+                <button
+                  onClick={handleTogglePin}
+                  className={`p-1.5 rounded-lg transition-colors ${
+                    snippet.isPinned
+                      ? 'bg-orange-50 dark:bg-orange-950/30 text-custom-orangered'
+                      : 'bg-slate-100 dark:bg-custom-dark-surface text-slate-400 hover:text-custom-orangered'
+                  }`}
+                  title={snippet.isPinned ? 'Unpin Snippet' : 'Pin Snippet'}
+                >
+                  <svg className={`w-3.5 h-3.5 ${snippet.isPinned ? 'rotate-45 text-custom-orangered' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                </button>
                 <button
                   onClick={handleTogglePublic}
                   disabled={updating}
@@ -247,6 +284,14 @@ const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled, onTagClick 
 
           {/* Actions */}
           <div className="flex items-center gap-1.5">
+            {/* Favorite button */}
+            <FavoriteButton
+              snippetId={snippet._id}
+              initialFavorited={Boolean(snippet.isFavorited)}
+              initialCount={snippet.favoriteCount || 0}
+              size="sm"
+            />
+
             {/* Like button */}
             <button
               onClick={handleLike}

@@ -2,20 +2,23 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { snippetsAPI } from '../services/api';
-import { FiFileText, FiGlobe, FiEye, FiHeart, FiCode } from 'react-icons/fi';
+import { snippetsAPI, favoritesAPI } from '../services/api';
+import SnippetCard from '../components/SnippetCard';
+import { FiFileText, FiGlobe, FiEye, FiHeart, FiCode, FiBookmark } from 'react-icons/fi';
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
 
   const [snippets, setSnippets] = useState([]);
+  const [favoriteSnippets, setFavoriteSnippets] = useState([]);
   const [loadingSnippets, setLoadingSnippets] = useState(true);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
   const [stats, setStats] = useState({ total: 0, public: 0, totalViews: 0, totalLikes: 0 });
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ username: '', bio: '', website: '', githubUrl: '', currentPassword: '', newPassword: '' });
-  const [activeTab, setActiveTab] = useState('snippets'); // 'snippets' | 'settings'
+  const [activeTab, setActiveTab] = useState('snippets'); // 'snippets' | 'favorites' | 'settings'
 
   useEffect(() => {
     document.title = 'My Profile | Code Snippet Manager';
@@ -27,6 +30,12 @@ const Profile = () => {
   useEffect(() => {
     fetchMySnippets();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'favorites') {
+      fetchFavorites();
+    }
+  }, [activeTab]);
 
   const fetchMySnippets = async () => {
     try {
@@ -41,6 +50,18 @@ const Profile = () => {
       console.error('Failed to fetch snippets:', err);
     } finally {
       setLoadingSnippets(false);
+    }
+  };
+
+  const fetchFavorites = async () => {
+    setLoadingFavorites(true);
+    try {
+      const res = await favoritesAPI.getFavorites({ limit: 50 });
+      setFavoriteSnippets(res.data.snippets || []);
+    } catch (err) {
+      console.error('Failed to fetch favorites:', err);
+    } finally {
+      setLoadingFavorites(false);
     }
   };
 
@@ -128,19 +149,37 @@ const Profile = () => {
 
       {/* Tabs */}
       <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-custom-dark-surface rounded-xl w-fit mb-6">
-        {['snippets', 'settings'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all capitalize ${
-              activeTab === tab
-                ? 'bg-white dark:bg-custom-dark-card text-slate-900 dark:text-white shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-            }`}
-          >
-            {tab === 'snippets' ? `My Snippets (${stats.total})` : 'Settings'}
-          </button>
-        ))}
+        <button
+          onClick={() => setActiveTab('snippets')}
+          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all ${
+            activeTab === 'snippets'
+              ? 'bg-white dark:bg-custom-dark-card text-slate-900 dark:text-white shadow-sm'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+          }`}
+        >
+          My Snippets ({stats.total})
+        </button>
+        <button
+          onClick={() => setActiveTab('favorites')}
+          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+            activeTab === 'favorites'
+              ? 'bg-white dark:bg-custom-dark-card text-slate-900 dark:text-white shadow-sm'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+          }`}
+        >
+          <FiBookmark className="w-4 h-4 text-amber-500" />
+          Favorites ({favoriteSnippets.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all ${
+            activeTab === 'settings'
+              ? 'bg-white dark:bg-custom-dark-card text-slate-900 dark:text-white shadow-sm'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+          }`}
+        >
+          Settings
+        </button>
       </div>
 
       {/* Snippets tab */}
@@ -162,21 +201,33 @@ const Profile = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {snippets.map(s => (
-                <Link
-                  key={s._id}
-                  to={`/snippets/${s._id}`}
-                  className="bg-white dark:bg-custom-dark-card border border-slate-200 dark:border-custom-dark-border rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 block"
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-semibold text-slate-900 dark:text-white text-sm truncate">{s.title}</h3>
-                    <span className="lang-badge text-xs shrink-0 capitalize">{s.language}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
-                    <span className="flex items-center gap-0.5"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx={12} cy={12} r={3} /></svg>{s.views}</span>
-                    <span className="flex items-center gap-0.5"><svg className="w-3 h-3" fill={s.isLiked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>{s.likeCount}</span>
-                    <span className={s.isPublic ? 'text-emerald-500' : 'text-slate-400'}>{s.isPublic ? 'Public' : 'Private'}</span>
-                  </div>
-                </Link>
+                <SnippetCard key={s._id} snippet={s} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Favorites tab */}
+      {activeTab === 'favorites' && (
+        <div>
+          {loadingFavorites ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map(i => <div key={i} className="h-32 rounded-2xl bg-slate-100 dark:bg-custom-dark-surface animate-pulse" />)}
+            </div>
+          ) : favoriteSnippets.length === 0 ? (
+            <div className="text-center py-20 bg-white dark:bg-custom-dark-card border border-slate-200 dark:border-custom-dark-border rounded-3xl animate-fade-in">
+              <div className="flex justify-center text-amber-400 mb-4">
+                <FiBookmark className="text-6xl" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">No favorite snippets</h3>
+              <p className="text-slate-500 dark:text-slate-400 mb-6">Click the bookmark icon on any snippet to save it to your favorites</p>
+              <Link to="/search" className="btn-primary">Browse Snippets</Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {favoriteSnippets.map(s => (
+                <SnippetCard key={s._id} snippet={s} />
               ))}
             </div>
           )}

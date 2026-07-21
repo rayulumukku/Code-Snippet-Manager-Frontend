@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { snippetsAPI } from '../services/api';
+import { snippetsAPI, favoritesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import SnippetCard from '../components/SnippetCard';
 import TagFilter from '../components/TagFilter';
+import PinnedSection from '../components/PinnedSection';
 import { useToast } from '../context/ToastContext';
-import { FiSearch } from 'react-icons/fi';
+import { FiSearch, FiBookmark } from 'react-icons/fi';
 
 const LANGUAGES = [
   'javascript', 'python', 'java', 'typescript', 'cpp', 'c',
@@ -25,7 +26,7 @@ const Home = () => {
   const { toast } = useToast();
   const [snippets, setSnippets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'mine'
+  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'mine' | 'favorites'
   const [filters, setFilters] = useState({ language: '', tags: '', page: 1, limit: 12, sort: 'newest' });
   const [pagination, setPagination] = useState({});
 
@@ -43,7 +44,10 @@ const Home = () => {
       const params = { ...filters };
       const response = activeTab === 'mine' && user
         ? await snippetsAPI.getMy(params)
+        : activeTab === 'favorites' && user
+        ? await favoritesAPI.getFavorites(params)
         : await snippetsAPI.getAll(params);
+
       setSnippets(response.data.snippets);
       setPagination({
         totalPages: response.data.totalPages,
@@ -137,6 +141,9 @@ const Home = () => {
 
       {/* Main content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Pinned Snippets Banner */}
+        <PinnedSection onTagClick={handleTagToggle} />
+
         {/* Tabs + Sort controls */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-custom-dark-surface rounded-xl w-fit">
@@ -151,16 +158,29 @@ const Home = () => {
               All Snippets
             </button>
             {user && (
-              <button
-                onClick={() => { setActiveTab('mine'); setFilters(f => ({ ...f, page: 1 })); }}
-                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-                  activeTab === 'mine'
-                    ? 'bg-white dark:bg-custom-dark-card text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                My Snippets
-              </button>
+              <>
+                <button
+                  onClick={() => { setActiveTab('mine'); setFilters(f => ({ ...f, page: 1 })); }}
+                  className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                    activeTab === 'mine'
+                      ? 'bg-white dark:bg-custom-dark-card text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  My Snippets
+                </button>
+                <button
+                  onClick={() => { setActiveTab('favorites'); setFilters(f => ({ ...f, page: 1 })); }}
+                  className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
+                    activeTab === 'favorites'
+                      ? 'bg-white dark:bg-custom-dark-card text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <FiBookmark className="w-3.5 h-3.5 text-amber-500" />
+                  Favorites
+                </button>
+              </>
             )}
           </div>
 

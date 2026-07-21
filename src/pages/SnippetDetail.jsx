@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import CodeExecutor from '../components/CodeExecutor';
 import TagChip from '../components/TagChip';
+import FavoriteButton from '../components/FavoriteButton';
+import PinnedBadge from '../components/PinnedBadge';
 import { FiFrown, FiFolder, FiGlobe, FiLock } from 'react-icons/fi';
 
 const SnippetDetail = () => {
@@ -186,8 +188,16 @@ const SnippetDetail = () => {
               </div>
             </div>
 
-            {/* Badges */}
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {/* Action buttons */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Favorite Button */}
+              <FavoriteButton
+                snippetId={id}
+                initialFavorited={Boolean(snippet.isFavorited)}
+                initialCount={snippet.favoriteCount || 0}
+                size="md"
+              />
+
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-sm font-semibold rounded-full ${
                 snippet.isPublic
                   ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40'
