@@ -24,7 +24,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
-          <Router>
+          <Router basename="/project/code-snippet-manager">
             <div className="min-h-screen bg-white text-slate-900 dark:bg-custom-dark-bg dark:text-custom-dark-text antialiased selection:bg-orange-200/60 selection:text-slate-900">
               <Navbar />
               <Suspense fallback={
