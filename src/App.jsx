@@ -7,6 +7,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
 import ProtectedRoute from './components/ProtectedRoute';
+import StructuredData from './components/StructuredData';
 
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
@@ -25,6 +26,7 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <Router basename="/project/code-snippet-manager">
+            <StructuredData />
             <div className="min-h-screen bg-white text-slate-900 dark:bg-custom-dark-bg dark:text-custom-dark-text antialiased selection:bg-orange-200/60 selection:text-slate-900">
               <Navbar />
               <Suspense fallback={
