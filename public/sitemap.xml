@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://rayulumukku.com/project/code-snippet-manager/</loc>
+    <loc>https://rayulumukku.com/projects/code-snippet-manager/</loc>
     <lastmod>2026-08-16</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://rayulumukku.com/project/code-snippet-manager/search</loc>
+    <loc>https://rayulumukku.com/projects/code-snippet-manager/search</loc>
     <lastmod>2026-08-16</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://rayulumukku.com/project/code-snippet-manager/login</loc>
+    <loc>https://rayulumukku.com/projects/code-snippet-manager/login</loc>
     <lastmod>2026-08-16</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://rayulumukku.com/project/code-snippet-manager/register</loc>
+    <loc>https://rayulumukku.com/projects/code-snippet-manager/register</loc>
     <lastmod>2026-08-16</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://rayulumukku.com/project/code-snippet-manager/collections</loc>
+    <loc>https://rayulumukku.com/projects/code-snippet-manager/collections</loc>
     <lastmod>2026-08-16</lastmod>
     <priority>0.7</priority>
   </url>

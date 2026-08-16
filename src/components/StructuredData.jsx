@@ -4,9 +4,9 @@ const StructuredData = () => {
     "@graph": [
       {
         "@type": "WebApplication",
-        "@id": "https://rayulumukku.com/project/code-snippet-manager/#application",
+        "@id": "https://rayulumukku.com/projects/code-snippet-manager/#application",
         "name": "Code Snippet Manager",
-        "url": "https://rayulumukku.com/project/code-snippet-manager/",
+        "url": "https://rayulumukku.com/projects/code-snippet-manager/",
         "description": "A web-based code snippet manager for storing, organizing, searching, editing, and managing reusable code snippets.",
         "applicationCategory": "DeveloperApplication",
         "applicationSubCategory": "Code Snippet Manager",
@@ -39,7 +39,7 @@ const StructuredData = () => {
       },
       {
         "@type": "BreadcrumbList",
-        "@id": "https://rayulumukku.com/project/code-snippet-manager/#breadcrumb",
+        "@id": "https://rayulumukku.com/projects/code-snippet-manager/#breadcrumb",
         "itemListElement": [
           {
             "@type": "ListItem",
@@ -57,7 +57,7 @@ const StructuredData = () => {
             "@type": "ListItem",
             "position": 3,
             "name": "Code Snippet Manager",
-            "item": "https://rayulumukku.com/project/code-snippet-manager/"
+            "item": "https://rayulumukku.com/projects/code-snippet-manager/"
           }
         ]
       }
