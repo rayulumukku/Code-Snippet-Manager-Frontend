@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { searchAPI } from '../services/api';
 import SnippetCard from '../components/SnippetCard';
@@ -46,7 +46,7 @@ const Search = () => {
     }
   };
 
-  const calculateDateFrom = (range) => {
+  const calculateDateFrom = useCallback((range) => {
     if (!range) return undefined;
     const now = new Date();
     if (range === '24h') return new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
@@ -54,24 +54,9 @@ const Search = () => {
     if (range === '30d') return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
     if (range === '1y') return new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
     return undefined;
-  };
+  }, []);
 
-  useEffect(() => {
-    const newParams = {};
-    if (query) newParams.q = query;
-    if (type !== 'snippets') newParams.type = type;
-    if (language) newParams.language = language;
-    if (author) newParams.author = author;
-    if (dateRange) newParams.dateRange = dateRange;
-    if (sort && sort !== 'relevance') newParams.sort = sort;
-    if (tags.length > 0) newParams.tags = tags.join(',');
-    if (page > 1) newParams.page = String(page);
-
-    setSearchParams(newParams, { replace: true });
-    handleSearch();
-  }, [query, type, language, author, dateRange, sort, tags, page]);
-
-  const handleSearch = async (e) => {
+  const handleSearch = useCallback(async (e) => {
     if (e) e.preventDefault();
     setLoading(true);
 
@@ -105,7 +90,22 @@ const Search = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [query, type, language, author, dateRange, sort, tags, page, calculateDateFrom]);
+
+  useEffect(() => {
+    const newParams = {};
+    if (query) newParams.q = query;
+    if (type !== 'snippets') newParams.type = type;
+    if (language) newParams.language = language;
+    if (author) newParams.author = author;
+    if (dateRange) newParams.dateRange = dateRange;
+    if (sort && sort !== 'relevance') newParams.sort = sort;
+    if (tags.length > 0) newParams.tags = tags.join(',');
+    if (page > 1) newParams.page = String(page);
+
+    setSearchParams(newParams, { replace: true });
+    handleSearch();
+  }, [query, type, language, author, dateRange, sort, tags, page, setSearchParams, handleSearch]);
 
   const handleTagToggle = (tag) => {
     setPage(1);

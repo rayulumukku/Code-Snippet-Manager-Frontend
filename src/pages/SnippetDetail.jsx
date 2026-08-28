@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -33,19 +33,7 @@ const SnippetDetail = () => {
     document.title = snippet ? `${snippet.title} | Code Snippet Manager` : 'Snippet | Code Snippet Manager';
   }, [snippet]);
 
-  useEffect(() => {
-    fetchSnippet();
-  }, [id]);
-
-  useEffect(() => {
-    if (showAddToCollection && user) {
-      collectionsAPI.getAll()
-        .then(r => setUserCollections(r.data.filter(c => c.owner?._id === user?._id)))
-        .catch(console.error);
-    }
-  }, [showAddToCollection, user]);
-
-  const fetchSnippet = async () => {
+  const fetchSnippet = useCallback(async () => {
     try {
       const res = await snippetsAPI.getById(id);
       setSnippet(res.data);
@@ -54,7 +42,19 @@ const SnippetDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchSnippet();
+  }, [fetchSnippet]);
+
+  useEffect(() => {
+    if (showAddToCollection && user) {
+      collectionsAPI.getAll()
+        .then(r => setUserCollections(r.data.filter(c => c.owner?._id === user?._id)))
+        .catch(console.error);
+    }
+  }, [showAddToCollection, user]);
 
   const handleDelete = async () => {
     if (!window.confirm('Delete this snippet? This cannot be undone.')) return;

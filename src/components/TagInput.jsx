@@ -15,15 +15,12 @@ const TagInput = ({ tags = [], onChange, placeholder = 'Add tags (press Enter or
 
   // Debounced search for autocomplete suggestions
   useEffect(() => {
-    if (!inputValue.trim()) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
+    const trimmed = inputValue.trim();
+    if (!trimmed) return;
 
     const timer = setTimeout(async () => {
       try {
-        const res = await snippetsAPI.getTags({ search: inputValue.trim(), limit: 8 });
+        const res = await snippetsAPI.getTags({ search: trimmed, limit: 8 });
         // Filter out tags already added
         const filtered = (res.data || []).filter(item => !tags.includes(item.tag));
         setSuggestions(filtered);
@@ -111,7 +108,13 @@ const TagInput = ({ tags = [], onChange, placeholder = 'Add tags (press Enter or
           <input
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              if (!e.target.value.trim()) {
+                setSuggestions([]);
+                setShowSuggestions(false);
+              }
+            }}
             onKeyDown={handleKeyDown}
             onFocus={() => inputValue.trim() && suggestions.length > 0 && setShowSuggestions(true)}
             placeholder={tags.length === 0 ? placeholder : 'Add more...'}

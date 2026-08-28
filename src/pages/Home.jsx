@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { snippetsAPI, favoritesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -34,11 +34,7 @@ const Home = () => {
     document.title = 'Code Snippet Manager — Find, save and share code';
   }, []);
 
-  useEffect(() => {
-    fetchSnippets();
-  }, [filters, activeTab]);
-
-  const fetchSnippets = async () => {
+  const fetchSnippets = useCallback(async () => {
     setLoading(true);
     try {
       const params = { ...filters };
@@ -60,7 +56,11 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, activeTab, user, toast]);
+
+  useEffect(() => {
+    fetchSnippets();
+  }, [fetchSnippets]);
 
   const handleSnippetDeleted = (deletedId) => {
     setSnippets(prev => prev.filter(s => s._id !== deletedId));

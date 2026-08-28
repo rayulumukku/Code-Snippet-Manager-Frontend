@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { versionsAPI } from '../services/api';
 import VersionCard from './VersionCard';
 import CodeDiffView from './CodeDiffView';
@@ -14,16 +14,7 @@ const VersionHistoryDrawer = ({ snippetId, currentSnippet, isOpen, onClose, onSn
   const [restoring, setRestoring] = useState(false);
   const [confirmRestoreVersion, setConfirmRestoreVersion] = useState(null);
 
-  useEffect(() => {
-    if (isOpen && snippetId) {
-      fetchHistory();
-    } else {
-      setSelectedVersion(null);
-      setConfirmRestoreVersion(null);
-    }
-  }, [isOpen, snippetId]);
-
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     setLoading(true);
     try {
       const res = await versionsAPI.getHistory(snippetId);
@@ -37,7 +28,16 @@ const VersionHistoryDrawer = ({ snippetId, currentSnippet, isOpen, onClose, onSn
     } finally {
       setLoading(false);
     }
-  };
+  }, [snippetId, toast]);
+
+  useEffect(() => {
+    if (isOpen && snippetId) {
+      fetchHistory();
+    } else {
+      setSelectedVersion(null);
+      setConfirmRestoreVersion(null);
+    }
+  }, [isOpen, snippetId, fetchHistory]);
 
   const handleRestore = async (version) => {
     setRestoring(true);

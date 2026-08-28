@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { collectionsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -15,17 +15,13 @@ const CollectionDetail = () => {
 
   useEffect(() => {
     if (collection) {
-      document.title = `${collection.name} | Rayulu Mukku`;
+      document.title = `${collection.name} | Code Snippet Manager`;
     } else {
-      document.title = 'Collection | Rayulu Mukku';
+      document.title = 'Collection | Code Snippet Manager';
     }
   }, [collection]);
 
-  useEffect(() => {
-    fetchCollection();
-  }, [id]);
-
-  const fetchCollection = async () => {
+  const fetchCollection = useCallback(async () => {
     try {
       const response = await collectionsAPI.getById(id);
       setCollection(response.data);
@@ -34,7 +30,11 @@ const CollectionDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchCollection();
+  }, [fetchCollection]);
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this collection?')) return;

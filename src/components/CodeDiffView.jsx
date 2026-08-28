@@ -31,9 +31,6 @@ const CodeDiffView = ({ oldCode = '', newCode = '', oldTitle = 'Previous Version
 
   const diffLines = useMemo(() => computeLineDiff(oldCode, newCode), [oldCode, newCode]);
 
-  const oldLines = useMemo(() => oldCode.split('\n'), [oldCode]);
-  const newLines = useMemo(() => newCode.split('\n'), [newCode]);
-
   return (
     <div className="rounded-2xl border border-slate-200 dark:border-custom-dark-border bg-slate-900 overflow-hidden font-mono text-xs shadow-xl animate-fade-in">
       {/* Controls Bar */}

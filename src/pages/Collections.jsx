@@ -17,7 +17,7 @@ const Collections = () => {
   const [filterPublic, setFilterPublic] = useState('all'); 
 
   useEffect(() => {
-    document.title = 'Collections | Rayulu Mukku';
+    document.title = 'Collections | Code Snippet Manager';
   }, []);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const Collections = () => {
       return;
     }
     fetchCollections();
-  }, [user]);
+  }, [user, navigate]);
 
   const fetchCollections = async () => {
     try {

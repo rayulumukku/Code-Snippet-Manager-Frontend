@@ -3,6 +3,7 @@ import { authAPI } from '../services/api';
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within an AuthProvider');
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }) => {
           const freshUser = response.data;
           setUser(freshUser);
           localStorage.setItem('user', JSON.stringify(freshUser));
-        } catch (error) {
+        } catch {
           // Token invalid — try refresh (handled by axios interceptor)
           // If refresh fails, the interceptor clears storage
           const stored = localStorage.getItem('token');
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await authAPI.logout();
-    } catch (_) {
+    } catch {
       // Silently ignore logout errors
     }
     localStorage.removeItem('token');
@@ -75,8 +76,11 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (data) => {
     const response = await authAPI.updateProfile(data);
     const updated = response.data;
-    setUser(prev => ({ ...prev, ...updated }));
-    localStorage.setItem('user', JSON.stringify({ ...user, ...updated }));
+    setUser(prev => {
+      const merged = { ...prev, ...updated };
+      localStorage.setItem('user', JSON.stringify(merged));
+      return merged;
+    });
     return updated;
   };
 

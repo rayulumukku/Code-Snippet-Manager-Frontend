@@ -1,6 +1,6 @@
 import { FiFileText, FiTag, FiUser, FiArrowRight } from 'react-icons/fi';
 
-const SearchSuggestions = ({ suggestions, onSelectTitle, onSelectTag, onSelectAuthor, activeIndex = -1 }) => {
+const SearchSuggestions = ({ suggestions, onSelectTitle, onSelectTag, onSelectAuthor }) => {
   const { titles = [], tags = [], authors = [] } = suggestions;
 
   const hasSuggestions = titles.length > 0 || tags.length > 0 || authors.length > 0;
@@ -15,7 +15,7 @@ const SearchSuggestions = ({ suggestions, onSelectTitle, onSelectTag, onSelectAu
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-2">
             Snippets
           </div>
-          {titles.map((title, i) => (
+          {titles.map((title) => (
             <button
               key={title}
               type="button"

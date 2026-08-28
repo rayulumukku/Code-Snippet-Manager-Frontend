@@ -16,10 +16,12 @@ const SearchHighlight = ({ text, query, className = '' }) => {
   const pattern = new RegExp(`(${terms.map(escapeRegExp).join('|')})`, 'gi');
   const parts = text.split(pattern);
 
+  const isMatch = (part) => terms.some(term => term.toLowerCase() === part.toLowerCase());
+
   return (
     <span className={className}>
       {parts.map((part, i) =>
-        pattern.test(part) ? (
+        isMatch(part) ? (
           <mark
             key={i}
             className="bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-100 font-semibold rounded px-0.5"

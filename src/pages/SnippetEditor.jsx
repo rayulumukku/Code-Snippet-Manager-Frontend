@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -38,17 +38,15 @@ const SnippetEditor = () => {
     document.title = isEdit ? 'Edit Snippet | Code Snippet Manager' : 'Create Snippet | Code Snippet Manager';
   }, [isEdit]);
 
-  useEffect(() => {
-    if (isEdit) fetchSnippet();
-  }, [id]);
-
-  const fetchSnippet = async () => {
+  const fetchSnippet = useCallback(async () => {
     try {
       const res = await snippetsAPI.getById(id);
       const snippet = res.data;
 
       // Redirect if not the owner
-      if (snippet.author._id !== user?._id) {
+      const authorId = snippet.author?._id || snippet.author;
+      const currentUserId = user?._id;
+      if (authorId && currentUserId && authorId.toString() !== currentUserId.toString()) {
         navigate('/');
         return;
       }
@@ -67,7 +65,11 @@ const SnippetEditor = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, user, navigate, toast]);
+
+  useEffect(() => {
+    if (isEdit) fetchSnippet();
+  }, [isEdit, fetchSnippet]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
