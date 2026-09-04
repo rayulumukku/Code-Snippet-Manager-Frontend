@@ -21,11 +21,13 @@ const Profile = lazy(() => import('./pages/Profile'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 function App() {
+  const basename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+
   return (
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
-          <Router basename="/projects/code-snippet-manager">
+          <Router basename={basename}>
             <StructuredData />
             <div className="min-h-screen bg-white text-slate-900 dark:bg-custom-dark-bg dark:text-custom-dark-text antialiased selection:bg-orange-200/60 selection:text-slate-900">
               <Navbar />

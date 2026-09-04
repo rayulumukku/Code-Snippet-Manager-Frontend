@@ -188,12 +188,13 @@ const Collections = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCollections.map((collection) => {
           
-            const snippetCount = collection.snippets?.length || 0;
-            const languages = collection.snippets?.reduce((acc, snippet) => {
+            const validSnippets = (collection.snippets || []).filter(Boolean);
+            const snippetCount = validSnippets.length;
+            const languages = validSnippets.reduce((acc, snippet) => {
               const lang = typeof snippet === 'object' ? snippet.language : null;
               if (lang) acc[lang] = (acc[lang] || 0) + 1;
               return acc;
-            }, {}) || {};
+            }, {});
             const languageCount = Object.keys(languages).length;
 
             return (

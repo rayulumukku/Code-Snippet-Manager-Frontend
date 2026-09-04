@@ -83,7 +83,8 @@ const CollectionDetail = () => {
 
 
   const getCollectionStats = () => {
-    if (!collection.snippets || collection.snippets.length === 0) {
+    const validSnippets = (collection.snippets || []).filter(Boolean);
+    if (validSnippets.length === 0) {
       return { languages: {}, totalViews: 0, totalForks: 0 };
     }
 
@@ -91,7 +92,7 @@ const CollectionDetail = () => {
     let totalViews = 0;
     let totalForks = 0;
 
-    collection.snippets.forEach((snippet) => {
+    validSnippets.forEach((snippet) => {
       if (snippet.language) {
         languages[snippet.language] = (languages[snippet.language] || 0) + 1;
       }
@@ -183,11 +184,11 @@ const CollectionDetail = () => {
         </div>
       </div>
 
-      {collection.snippets && collection.snippets.length > 0 ? (
+      {collection.snippets && collection.snippets.filter(Boolean).length > 0 ? (
         <div>
-          <h2 className="text-2xl font-bold text-custom-black dark:text-custom-dark-text mb-4">Snippets ({collection.snippets.length})</h2>
+          <h2 className="text-2xl font-bold text-custom-black dark:text-custom-dark-text mb-4">Snippets ({collection.snippets.filter(Boolean).length})</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {collection.snippets.map((snippet) => (
+            {collection.snippets.filter(Boolean).map((snippet) => (
               <div key={snippet._id} className="relative">
                 <SnippetCard snippet={snippet} />
                 {isOwner && (

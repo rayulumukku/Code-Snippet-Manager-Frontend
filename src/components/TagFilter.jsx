@@ -14,9 +14,10 @@ const TagFilter = ({ selectedTags = [], onTagToggle, onClearAll, className = '' 
   const fetchPopularTags = async () => {
     try {
       const res = await snippetsAPI.getTags({ limit: 20 });
-      setPopularTags(res.data || []);
+      setPopularTags(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Failed to load popular tags:', err);
+      setPopularTags([]);
     } finally {
       setLoading(false);
     }
