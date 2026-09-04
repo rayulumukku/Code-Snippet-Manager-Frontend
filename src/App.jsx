@@ -1,8 +1,9 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
@@ -23,14 +24,22 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 function App() {
   const basename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
+  useEffect(() => {
+    // If accessed directly at domain root while configured with a base path, redirect smoothly
+    if (basename && window.location.pathname === '/') {
+      window.location.replace(basename + '/');
+    }
+  }, [basename]);
+
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <Router basename={basename}>
-            <StructuredData />
-            <div className="min-h-screen bg-white text-slate-900 dark:bg-custom-dark-bg dark:text-custom-dark-text antialiased selection:bg-orange-200/60 selection:text-slate-900">
-              <Navbar />
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <Router basename={basename}>
+              <StructuredData />
+              <div className="min-h-screen bg-white text-slate-900 dark:bg-custom-dark-bg dark:text-custom-dark-text antialiased selection:bg-orange-200/60 selection:text-slate-900">
+                <Navbar />
               <Suspense fallback={
                 <div className="min-h-[60vh] flex items-center justify-center">
                   <div className="w-10 h-10 border-2 border-custom-orangered border-t-transparent rounded-full animate-spin" />
@@ -64,6 +73,7 @@ function App() {
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
+  </ErrorBoundary>
   );
 }
 
