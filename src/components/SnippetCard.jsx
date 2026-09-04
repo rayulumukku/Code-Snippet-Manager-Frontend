@@ -37,7 +37,8 @@ const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled, onTagClick 
   const containerRef = useRef(null);
   const isIntersecting = useIntersectionObserver(containerRef, { triggerOnce: true });
 
-  const isOwner = user && snippet.author?._id === user._id;
+  const authorId = snippet.author?._id || snippet.author;
+  const isOwner = user && authorId && authorId.toString() === user._id?.toString();
   const langClass = LangColor[snippet.language] || defaultLangColor;
 
   useEffect(() => {

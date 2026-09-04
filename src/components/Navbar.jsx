@@ -75,7 +75,7 @@ const Navbar = () => {
         <div className="flex h-16 items-center justify-between">
           {/* Logo on the Left */}
           <Link to="/" className="flex items-center gap-2 group shrink-0">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="CSM Logo" className="w-8 h-8 object-contain shadow-md rounded-lg group-hover:shadow-orange-500/40 transition-shadow" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="CSM Logo" className="w-8 h-8 rounded-full object-contain shadow-md group-hover:shadow-orange-500/40 transition-shadow" />
             <span className="text-sm sm:text-base font-bold gradient-text tracking-wide">
               Code Snippet Manager
             </span>

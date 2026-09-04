@@ -19,9 +19,9 @@ const Loader = () => {
         {/* Logo Container */}
         <div className="relative h-24 w-24 animate-pulse">
           <img 
-            src="/logo.png" 
+            src={`${import.meta.env.BASE_URL}logo.png`} 
             alt="Logo" 
-            className="h-full w-full object-contain"
+            className="h-full w-full rounded-full object-contain shadow-xl ring-4 ring-orange-500/20"
           />
         </div>
       </div>

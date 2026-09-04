@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiBookmark } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
@@ -21,6 +21,14 @@ const FavoriteButton = ({
   const [isFavorited, setIsFavorited] = useState(initialFavorited);
   const [favoriteCount, setFavoriteCount] = useState(initialCount);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setIsFavorited(initialFavorited);
+  }, [initialFavorited]);
+
+  useEffect(() => {
+    setFavoriteCount(initialCount);
+  }, [initialCount]);
 
   const handleToggle = async (e) => {
     e.preventDefault();

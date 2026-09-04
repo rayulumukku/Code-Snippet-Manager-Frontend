@@ -146,7 +146,8 @@ const SnippetDetail = () => {
     );
   }
 
-  const isOwner = user && snippet.author._id === user._id;
+  const authorId = snippet.author?._id || snippet.author;
+  const isOwner = user && authorId && authorId.toString() === user._id?.toString();
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
@@ -407,7 +408,9 @@ const SnippetDetail = () => {
         currentSnippet={snippet}
         isOpen={historyOpen}
         onClose={() => setHistoryOpen(false)}
-        onSnippetRestored={(updated) => setSnippet(updated)}
+        onSnippetRestored={async () => {
+          await fetchSnippet();
+        }}
         isOwner={isOwner}
       />
     </div>

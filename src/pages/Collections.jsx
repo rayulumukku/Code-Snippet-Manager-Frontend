@@ -236,7 +236,7 @@ const Collections = () => {
                     {collection.isPublic ? 'Public' : 'Private'}
                   </span>
                 </div>
-                {collection.owner?._id === user?._id && (
+                {Boolean(user && (collection.owner?._id || collection.owner)?.toString() === user._id?.toString()) && (
                   <button
                     onClick={() => handleDelete(collection._id)}
                     className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm flex items-center gap-1"

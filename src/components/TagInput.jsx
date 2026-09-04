@@ -45,28 +45,36 @@ const TagInput = ({ tags = [], onChange, placeholder = 'Add tags (press Enter or
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const addTag = (rawTag) => {
+  const addTag = (rawInput) => {
     setErrorMsg('');
-    const cleaned = rawTag.trim().toLowerCase().replace(/^[#\s]+/, '');
+    const rawList = typeof rawInput === 'string' ? rawInput.split(',') : [rawInput];
+    let currentTags = [...tags];
 
-    if (!cleaned) return;
+    for (const rawTag of rawList) {
+      const cleaned = String(rawTag || '').trim().toLowerCase().replace(/^[#\s]+/, '');
+      if (!cleaned) continue;
 
-    if (cleaned.length > MAX_TAG_LENGTH) {
-      setErrorMsg(`Tag must be ${MAX_TAG_LENGTH} characters or less`);
-      return;
+      if (cleaned.length > MAX_TAG_LENGTH) {
+        setErrorMsg(`Tag must be ${MAX_TAG_LENGTH} characters or less`);
+        continue;
+      }
+
+      if (currentTags.includes(cleaned)) {
+        setErrorMsg(`Tag "#${cleaned}" is already added`);
+        continue;
+      }
+
+      if (currentTags.length >= MAX_TAGS) {
+        setErrorMsg(`Maximum of ${MAX_TAGS} tags allowed`);
+        break;
+      }
+
+      currentTags.push(cleaned);
     }
 
-    if (tags.includes(cleaned)) {
-      setErrorMsg(`Tag "#${cleaned}" is already added`);
-      return;
+    if (currentTags.length !== tags.length) {
+      onChange(currentTags);
     }
-
-    if (tags.length >= MAX_TAGS) {
-      setErrorMsg(`Maximum of ${MAX_TAGS} tags allowed`);
-      return;
-    }
-
-    onChange([...tags, cleaned]);
     setInputValue('');
     setShowSuggestions(false);
   };
@@ -113,6 +121,13 @@ const TagInput = ({ tags = [], onChange, placeholder = 'Add tags (press Enter or
               if (!e.target.value.trim()) {
                 setSuggestions([]);
                 setShowSuggestions(false);
+              }
+            }}
+            onPaste={(e) => {
+              const pasted = e.clipboardData.getData('text');
+              if (pasted && pasted.includes(',')) {
+                e.preventDefault();
+                addTag(pasted);
               }
             }}
             onKeyDown={handleKeyDown}

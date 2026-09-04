@@ -79,7 +79,7 @@ const CollectionDetail = () => {
 
   if (!collection) return null;
 
-  const isOwner = user && collection.owner._id === user._id;
+  const isOwner = user && collection.owner && (collection.owner._id || collection.owner).toString() === user._id?.toString();
 
 
   const getCollectionStats = () => {

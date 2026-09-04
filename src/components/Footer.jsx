@@ -9,7 +9,7 @@ const Footer = () => {
           {/* Col 1: Brand Info */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2 group w-fit">
-              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="CSM Logo" className="w-9 h-9 object-contain shadow-md rounded-xl group-hover:shadow-orange-500/40 transition-all" />
+              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="CSM Logo" className="w-9 h-9 rounded-full object-contain shadow-md group-hover:shadow-orange-500/40 transition-all" />
               <span className="text-lg font-bold gradient-text tracking-wide">
                 Code Snippet Manager
               </span>

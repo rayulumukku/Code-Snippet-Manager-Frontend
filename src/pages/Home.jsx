@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { snippetsAPI, favoritesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import SnippetCard from '../components/SnippetCard';
@@ -24,11 +24,23 @@ const SORT_OPTIONS = [
 const Home = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
   const [snippets, setSnippets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'mine' | 'favorites'
+  const [activeTab, setActiveTab] = useState(
+    tabParam === 'mine' || tabParam === 'favorites' ? tabParam : 'all'
+  );
   const [filters, setFilters] = useState({ language: '', tags: '', page: 1, limit: 12, sort: 'newest' });
   const [pagination, setPagination] = useState({});
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['all', 'mine', 'favorites'].includes(tab)) {
+      setActiveTab(tab);
+      setFilters((f) => ({ ...f, page: 1 }));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     document.title = 'Code Snippet Manager — Find, save and share code';

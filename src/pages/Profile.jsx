@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { snippetsAPI, favoritesAPI } from '../services/api';
@@ -9,6 +9,8 @@ import { FiFileText, FiGlobe, FiEye, FiHeart, FiCode, FiBookmark } from 'react-i
 const Profile = () => {
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
 
   const [snippets, setSnippets] = useState([]);
   const [favoriteSnippets, setFavoriteSnippets] = useState([]);
@@ -17,7 +19,16 @@ const Profile = () => {
   const [stats, setStats] = useState({ total: 0, public: 0, totalViews: 0, totalLikes: 0 });
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ username: '', bio: '', website: '', githubUrl: '', currentPassword: '', newPassword: '' });
-  const [activeTab, setActiveTab] = useState('snippets'); // 'snippets' | 'favorites' | 'settings'
+  const [activeTab, setActiveTab] = useState(
+    tabParam === 'favorites' || tabParam === 'settings' ? tabParam : 'snippets'
+  ); // 'snippets' | 'favorites' | 'settings'
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['snippets', 'favorites', 'settings'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     document.title = 'My Profile | Code Snippet Manager';

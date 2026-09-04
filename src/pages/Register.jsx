@@ -87,17 +87,8 @@ const Register = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 text-2xl font-bold gradient-text">
-            <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="url(#grad2)" strokeWidth={2}>
-              <defs>
-                <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#f97316" />
-                  <stop offset="100%" stopColor="#ef4444" />
-                </linearGradient>
-              </defs>
-              <polyline points="16 18 22 12 16 6" />
-              <polyline points="8 6 2 12 8 18" />
-            </svg>
-            CodeSnippet
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="CSM Logo" className="w-10 h-10 rounded-full object-contain shadow-md" />
+            Code Snippet Manager
           </Link>
           <h1 className="mt-6 text-3xl font-bold text-slate-900 dark:text-white">Create account</h1>
           <p className="mt-2 text-slate-500 dark:text-slate-400 text-sm">Join thousands of developers</p>

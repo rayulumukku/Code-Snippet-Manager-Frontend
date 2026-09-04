@@ -4,19 +4,23 @@ const MAX_HISTORY = 8;
 export const getRecentSearches = () => {
   try {
     const data = localStorage.getItem(HISTORY_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 };
 
 export const addRecentSearch = (query) => {
-  if (!query || typeof query !== 'string' || !query.trim()) return;
+  if (!query || typeof query !== 'string' || !query.trim()) {
+    return getRecentSearches();
+  }
   const cleaned = query.trim();
 
   try {
     const history = getRecentSearches();
-    const filtered = history.filter((item) => item.toLowerCase() !== cleaned.toLowerCase());
+    const filtered = history.filter((item) => typeof item === 'string' && item.toLowerCase() !== cleaned.toLowerCase());
     const updated = [cleaned, ...filtered].slice(0, MAX_HISTORY);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
     return updated;

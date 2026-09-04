@@ -71,7 +71,7 @@ export const getStaticCommands = (user, { navigate, toggleTheme, logout, toast }
           category: 'Actions',
           keywords: ['favorites', 'starred', 'saved', 'bookmarks'],
           shortcut: '⌘F',
-          perform: () => navigate('/profile'),
+          perform: () => navigate('/profile?tab=favorites'),
         },
       ]
     : [

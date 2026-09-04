@@ -65,9 +65,11 @@ api.interceptors.response.use(
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         // Only redirect if not already on login/register
-        if (!window.location.pathname.startsWith('/login') &&
-            !window.location.pathname.startsWith('/register')) {
-          window.location.href = '/login';
+        const base = import.meta.env.BASE_URL || '/';
+        const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
+          window.location.href = `${normalizedBase}/login`;
         }
         return Promise.reject(refreshError);
       } finally {

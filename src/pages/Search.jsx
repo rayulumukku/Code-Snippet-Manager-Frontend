@@ -93,6 +93,30 @@ const Search = () => {
   }, [query, type, language, author, dateRange, sort, tags, page, calculateDateFrom]);
 
   useEffect(() => {
+    const qParam = searchParams.get('q') || '';
+    const typeParam = searchParams.get('type') || 'snippets';
+    const langParam = searchParams.get('language') || '';
+    const authorParam = searchParams.get('author') || '';
+    const dateRangeParam = searchParams.get('dateRange') || '';
+    const sortParam = searchParams.get('sort') || 'relevance';
+    const paramTags = searchParams.get('tags');
+    const tagsParam = paramTags ? paramTags.split(',').map((t) => t.trim()).filter(Boolean) : [];
+    const pageParam = parseInt(searchParams.get('page') || '1', 10);
+
+    setQuery(qParam);
+    setType(typeParam);
+    setLanguage(langParam);
+    setAuthor(authorParam);
+    setDateRange(dateRangeParam);
+    setSort(sortParam);
+    setTags(tagsParam);
+    setPage(pageParam);
+    if (tagsParam.length > 0 || langParam || authorParam || dateRangeParam) {
+      setShowFilters(true);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     const newParams = {};
     if (query) newParams.q = query;
     if (type !== 'snippets') newParams.type = type;
