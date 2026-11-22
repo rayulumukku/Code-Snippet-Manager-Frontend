@@ -1,176 +1,184 @@
-# Code Snippet Manager — Frontend 🎨
+# Code Snippet Manager Frontend
 
-![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react)
-![Vite](https://img.shields.io/badge/Vite-7.x-646CFF?style=for-the-badge&logo=vite)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)
-![Vitest](https://img.shields.io/badge/Tested%20with-Vitest-6E9F18?style=for-the-badge&logo=vitest)
-![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)
-
-A modern, super-responsive, production-grade web application built for developers, engineers, and students to create, manage, benchmark, practice, and share code snippets worldwide.
+Modern single-page web client built for code snippet discovery, structural complexity benchmarking, active-recall practice, and multi-format distribution.
 
 ---
 
-## ✨ Cutting-Edge Developer & Student Features
+## Overview
 
-### 1. 🔍 Universal Command Palette (`⌘K` / `Ctrl+K`)
-- Spotlight-style keyboard navigation accessible from anywhere.
-- Instant search across code titles, tags, and authors with live debounced suggestions.
-- Quick navigation shortcuts: toggle themes, navigate to collections, or open developer tools.
-
-### 2. 📊 Code Complexity & Health Metrics Analyzer
-- Real-time AST structural analysis computing:
-  - **Lines of Code (LOC)**, code-to-comment ratio, blank lines.
-  - **Estimated Cyclomatic Complexity**: Branching keyword detection (`if`, `for`, `while`, `catch`, `case`, `? :`, `&&`, `||`).
-  - **Cognitive Load & Reading Time**: Understand how quickly a developer or student can parse the algorithm.
-  - **Architecture Health Insights**: Actionable recommendations for code structure and maintainability.
-
-### 3. 🎓 Student Active-Recall & Quiz Mode
-- Transforms any code snippet into an active learning quiz:
-  - Dynamically calculates **Time & Space Complexity (Big-O)**.
-  - Generates critical **runtime edge-case testing** scenarios.
-  - Highlights core **programming paradigms** (OOP, FP, Memoization, Asynchronous I/O).
-  - Provides instant answer verification, score counter, and detailed technical explanations.
-
-### 4. 📦 1-Click Multi-Format Export Suite
-- **Native Source File**: One-click download with correct language extensions (`.js`, `.py`, `.cpp`, `.rs`, `.go`, `.ts`, `.html`).
-- **Markdown with Syntax Fences**: Formatted with titles, metadata, and tags for GitHub READMEs or Notion.
-- **Complete JSON Schema**: Full snippet object export with author and version metadata.
-- **Terminal cURL Command**: Instant one-liner to stream code straight into bash or pipe to a compiler.
-
-### 5. ⚡ Code Editor & 1-Click Beautifier
-- **Auto-Formatting (`Alt + Shift + F`)**: Normalizes indentation, trims trailing spaces, and standardizes code structures.
-- **Tab Key Indentation**: 2-space indentation with cursor preservation (and `Shift + Tab` unindent).
-- **Starter Templates**: Instant boilerplate for Binary Search, Debounce, Competitive Programming C++, LRU Cache, and Fetch with Retry.
-
-### 6. 📖 Big-O Complexity & Syntax Cheat Sheet (`⌘ + Shift + C`)
-- Built-in reference sheet featuring:
-  - Time & Space complexity comparisons for common data structures and sorting algorithms.
-  - Modern JavaScript Array methods and Async/Await patterns.
-  - Python idioms and comprehensions.
-  - Daily Git workflow commands and HTTP Status Code cheat sheets.
-
-### 7. 🔀 Git-Like Version History & Code Diffs
-- Side-by-side **Split View** and **Unified View** comparing lines added, removed, or unchanged across version revisions.
-- One-click restore point activation for snippet authors.
-
-### 8. 📱 Super-Responsive Multi-Viewport Architecture
-- **Mobile (< 640px)**: 1-column layouts, touch-friendly 44px+ tap targets, no horizontal overflow.
-- **Tablet (768px – 1024px)**: Fluid 2-column cards, adaptive filter drawers, and modal responsiveness.
-- **Desktop (1280px)**: 3-column balanced grids.
-- **Ultra-Wide (1536px – 2560px 4K)**: 4-column fluid grids (`2xl:grid-cols-4`) with `max-w-7xl` centering.
-- **Zero One-Sided Border Highlights**: Adheres to balanced 360-degree rounded borders, surface pills, and smooth elevation.
+The Code Snippet Manager frontend is developed using React 19, Vite, and Tailwind CSS. It delivers an intuitive, responsive interface optimized for developers, software engineers, and computer science students. The application emphasizes clean visual hierarchy, keyboard-driven workflows, interactive code execution, and adaptive responsiveness across every display size.
 
 ---
 
-## 📁 Project Structure
+## Developer and Student Features
+
+### 1. Command Palette Navigation (`Cmd+K` / `Ctrl+K`)
+- Spotlight-style navigation overlay accessible from any screen via `Cmd+K` or `Ctrl+K`.
+- Fast fuzzy filtering across snippet titles, language categories, tags, and author profiles.
+- Integrated keyboard triggers for changing visual themes, accessing collections, and opening documentation cheat sheets.
+
+### 2. Code Complexity and Health Metrics Analyzer
+- Automated AST structural analyzer providing instant insight into code quality:
+  - **Lines of Code (LOC)**: Total lines, code lines, blank lines, and comment lines.
+  - **Documentation Ratio**: Real-time comment-to-code percentage calculation.
+  - **Cyclomatic and Cognitive Complexity**: Automated detection of branching keywords (`if`, `for`, `while`, `catch`, `case`, ternary operators, and logical conditionals).
+  - **Difficulty Assessment**: Categorizes snippets into Low, Moderate, or High complexity tiers.
+  - **Comprehension Velocity**: Estimates reading and evaluation time for learners studying unfamiliar algorithms.
+  - **Actionable Insights**: Specific recommendations to decompose deeply nested functions or improve documentation coverage.
+
+### 3. Student Active-Recall and Quiz Engine
+- Transforms static code listings into interactive learning modules:
+  - Dynamically computes and tests **Time and Space Complexity (Big-O)** based on algorithm structure.
+  - Evaluates critical **runtime edge cases** (e.g., null references, zero denominators, empty collections).
+  - Highlights core **programming paradigms** (Object-Oriented Encapsulation, Functional Pipelines, Dynamic Programming, Asynchronous Event Loops).
+  - Provides instantaneous verification, scoring telemetry, and clear conceptual explanations for incorrect choices.
+
+### 4. Multi-Format Export Suite
+- **Source File Download**: Exports code directly into native language file extensions (`.js`, `.py`, `.cpp`, `.rs`, `.go`, `.ts`, `.html`).
+- **Formatted Markdown**: Generates complete Markdown documentation blocks formatted with language fences and metadata for GitHub READMEs or technical notes.
+- **Structured JSON**: Exports full snippet payloads with tags, author information, and revision history metadata.
+- **Terminal cURL Command**: Generates one-line terminal commands for streaming plaintext directly to shell interpreters.
+
+### 5. Code Editor and Auto-Formatter
+- **Integrated Formatting (`Alt + Shift + F`)**: Normalizes indentation levels, resolves bracket matching, strips trailing whitespace, and formats JSON structures.
+- **Tab Key Indentation**: Supports two-space indentation with cursor preservation (`Tab` to indent, `Shift + Tab` to unindent).
+- **Curated Starter Templates**: Pre-configured boilerplates for Binary Search, Debounce Utilities, Competitive Programming C++ templates, LRU Caches, and Resilient Fetch with Retry logic.
+
+### 6. Big-O Complexity and Syntax Cheat Sheet (`Cmd + Shift + C`)
+- Built-in reference sheet accessible throughout the interface:
+  - Asymptotic complexity table comparing common data structures and sorting algorithms.
+  - Modern JavaScript array methods and asynchronous execution patterns.
+  - Python idioms, comprehensions, and slicing conventions.
+  - Daily Git commands and HTTP status code reference tables.
+
+### 7. Version History and Line Diff Viewer
+- Side-by-side **Split View** and **Unified View** comparing code snapshots across historical revisions.
+- Line-by-line diff engine highlighting additions, removals, and unchanged code blocks.
+- One-click restore functionality allowing snippet owners to roll back changes safely.
+
+---
+
+## Visual Design Standards
+
+- **Zero One-Sided Border Highlights**: The application strictly avoids directional accent borders (such as left-edge or bottom-edge accent strips). All containers, cards, dialogs, and navigation elements utilize balanced, 360-degree rounded borders, soft elevation, and surface tinting.
+- **Multi-Device Responsiveness**:
+  - **Mobile (< 640px)**: Single-column layouts with touch-friendly 44px minimum tap targets, wrapped toolbars, and scrollable code containers.
+  - **Tablet (768px to 1024px)**: Fluid two-column grids with adaptive navigation drawers.
+  - **Desktop (1280px)**: Three-column balanced catalog layouts with persistent quick search.
+  - **Ultra-Wide and 4K (> 1536px)**: Four-column grid arrangements (`2xl:grid-cols-4`) centered within maximum-width constraints (`max-w-7xl`).
+- **Theme Support**: Seamless Dark Mode and Light Mode with persistent local state storage.
+
+---
+
+## Directory Structure
 
 ```
 Code-Snippet-Manager-Frontend/
-├── public/                  # Static assets & favicon
-├── src/
-│   ├── components/
-│   │   ├── CheatSheetModal.jsx      # Big-O & syntax cheat sheet
-│   │   ├── CodeDiffView.jsx         # Line diff comparison (split/unified)
-│   │   ├── CodeExecutor.jsx         # In-browser sandboxed execution engine
-│   │   ├── CodeMetricsModal.jsx     # Complexity & health metrics analyzer
-│   │   ├── CommandPalette.jsx       # Cmd+K spotlight search & actions
-│   │   ├── ExportModal.jsx          # Multi-format export suite
-│   │   ├── Navbar.jsx               # Responsive navigation & search trigger
-│   │   ├── Pagination.jsx           # Windowed sliding pagination
-│   │   ├── ShareEmbedModal.jsx      # Responsive iframe & markdown badge embed
-│   │   ├── SnippetCard.jsx          # Interactive snippet preview card
-│   │   ├── StudentQuizModal.jsx     # Active-recall student practice modal
-│   │   ├── TagFilter.jsx            # Multi-tag selector & filter pills
-│   │   └── VersionHistoryDrawer.jsx # Version history slide-out drawer
-│   ├── context/
-│   │   ├── AuthContext.jsx          # Session state & authentication provider
-│   │   ├── ThemeContext.jsx         # Dark / light theme provider
-│   │   └── ToastContext.jsx         # Custom notification system
-│   ├── pages/
-│   │   ├── CollectionDetail.jsx     # Curated collection view & manager
-│   │   ├── Collections.jsx          # Public & personal collections directory
-│   │   ├── Home.jsx                 # Main discovery feed, tabs & language pills
-│   │   ├── Login.jsx / Register.jsx # Authentication screens
-│   │   ├── Profile.jsx              # User profile & created snippet library
-│   │   ├── Search.jsx               # Weighted search with advanced filters
-│   │   ├── SnippetDetail.jsx        # Full snippet view, runner & action bar
-│   │   └── SnippetEditor.jsx        # Create/edit snippet with templates & formatter
-│   ├── services/
-│   │   └── api.js                   # Axios HTTP client with auth interceptors
-│   └── utils/
-│       ├── codeMetrics.js           # AST complexity & metric algorithms
-│       ├── commandRegistry.js       # Command palette actions & shortcuts
-│       ├── exportUtils.js           # File exporter & markdown formatters
-│       └── quizGenerator.js         # Intelligent quiz question generator
-├── tests/                           # Vitest test suites
-├── vercel.json                      # Vercel deployment & rewrite config
-├── vite.config.js                   # Vite bundler config with chunk optimization
-└── tailwind.config.js               # Tailwind styling & typography tokens
+|-- public/                  # Static assets and site icon
+|-- src/
+|   |-- components/
+|   |   |-- CheatSheetModal.jsx      # Big-O and syntax reference modal
+|   |   |-- CodeDiffView.jsx         # Line-by-line diff comparison viewer
+|   |   |-- CodeExecutor.jsx         # Sandboxed in-browser code execution engine
+|   |   |-- CodeMetricsModal.jsx     # Complexity and structural metrics dialog
+|   |   |-- CommandPalette.jsx       # Cmd+K spotlight search overlay
+|   |   |-- ExportModal.jsx          # Multi-format export dialog
+|   |   |-- Navbar.jsx               # Header navigation with mobile menu
+|   |   |-- Pagination.jsx           # Dynamic sliding pagination controls
+|   |   |-- ShareEmbedModal.jsx      # Responsive iframe and markdown badge generator
+|   |   |-- SnippetCard.jsx          # Snippet preview card
+|   |   |-- StudentQuizModal.jsx     # Active-recall quiz engine
+|   |   |-- TagFilter.jsx            # Multi-tag selection and filter badges
+|   |   `-- VersionHistoryDrawer.jsx # Git-like version revision drawer
+|   |-- context/
+|   |   |-- AuthContext.jsx          # Session state and auth provider
+|   |   |-- ThemeContext.jsx         # Theme toggle provider
+|   |   `-- ToastContext.jsx         # Notification alert provider
+|   |-- pages/
+|   |   |-- CollectionDetail.jsx     # Curated collection view
+|   |   |-- Collections.jsx          # Collection directory
+|   |   |-- Home.jsx                 # Discovery feed with language filters
+|   |   |-- Login.jsx / Register.jsx # Authentication interfaces
+|   |   |-- Profile.jsx              # User profile and authored snippet library
+|   |   |-- Search.jsx               # Weighted search with advanced filters
+|   |   |-- SnippetDetail.jsx        # Snippet view, execution, and metrics toolbar
+|   |   `-- SnippetEditor.jsx        # Snippet creation and auto-formatting
+|   |-- services/
+|   |   `-- api.js                   # Axios HTTP client configuration
+|   `-- utils/
+|       |-- codeMetrics.js           # Structural complexity analysis algorithms
+|       |-- commandRegistry.js       # Command palette registry and shortcuts
+|       |-- exportUtils.js           # Multi-extension export formatters
+|       `-- quizGenerator.js         # Dynamic quiz generation logic
+|-- tests/                           # Vitest component and integration suites
+|-- vercel.json                      # Deployment and rewrite configuration
+|-- vite.config.js                   # Vite bundler configuration
+`-- tailwind.config.js               # Tailwind design system tokens
 ```
 
 ---
 
-## 🛠️ Getting Started
+## Getting Started
 
 ### Prerequisites
-- **Node.js** v18+
-- **npm** or **pnpm**
+- Node.js 18.0.0 or higher
+- npm or pnpm
 
 ### Installation
 
-1. **Navigate to the frontend directory**:
+1. Navigate to the frontend directory:
    ```bash
    cd Code-Snippet-Manager-Frontend
    ```
 
-2. **Install dependencies**:
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-3. **Configure Environment Variables**:
-   Create a `.env` file in the root directory:
+3. Configure environment variables in `.env`:
    ```env
    VITE_API_BASE_URL=http://localhost:5000/api
    ```
 
-4. **Start the development server**:
+4. Start the local development server:
    ```bash
    npm run dev
    ```
-   Open `http://localhost:5173` in your browser.
 
 ---
 
-## 📦 Production Build & Scripts
+## Available Scripts
 
 ```bash
-# Build for production
+# Start local development server with Hot Module Replacement (HMR)
+npm run dev
+
+# Compile production bundle into dist/
 npm run build
 
-# Run automated test suites (Vitest)
+# Run automated Vitest test suites
 npm test
 
-# Run ESLint linter
+# Run ESLint validation
 npm run lint
 
-# Preview production build locally
+# Preview the production build locally
 npm run preview
 ```
 
 ---
 
-## 🌐 Deployment & Vercel Rewrites
+## Deployment and Routing
 
-This frontend is optimized for deployment on **Vercel**.
+The frontend is configured for deployment on Vercel with dedicated header caching and route rewrites.
 
-> [!IMPORTANT]
-> **Preserved Cloudflare Rerouting**:
-> In `vercel.json`, the rewrite rule:
-> ```json
-> {
->   "source": "/projects/code-snippet-manager/(.*)",
->   "destination": "/index.html"
-> }
-> ```
-> is reserved for Cloudflare portfolio integration and must remain intact.
+### Preserved Cloudflare Rewrite
+The routing rule in `vercel.json`:
+```json
+{
+  "source": "/projects/code-snippet-manager/(.*)",
+  "destination": "/index.html"
+}
+```
+maintains direct integration with the external Cloudflare portfolio rerouting configuration and must remain unmodified.
