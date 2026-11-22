@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { authAPI, favoritesAPI } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -12,7 +12,37 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [favoriteIds, setFavoriteIds] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const fetchFavoriteIds = useCallback(async () => {
+    try {
+      const response = await favoritesAPI.getFavoriteIds();
+      const ids = Array.isArray(response.data)
+        ? response.data
+        : (response.data?.favoriteIds || []);
+      setFavoriteIds(ids.map(id => id.toString()));
+    } catch {
+      // Failed to load favorite IDs, keep previous or empty
+    }
+  }, []);
+
+  const toggleFavoriteId = useCallback((snippetId, isFav) => {
+    if (!snippetId) return;
+    const strId = snippetId.toString();
+    setFavoriteIds(prev => {
+      if (isFav) {
+        return prev.includes(strId) ? prev : [...prev, strId];
+      } else {
+        return prev.filter(id => id !== strId);
+      }
+    });
+  }, []);
+
+  const isFavorited = useCallback((snippetId) => {
+    if (!snippetId) return false;
+    return favoriteIds.includes(snippetId.toString());
+  }, [favoriteIds]);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -23,6 +53,7 @@ export const AuthProvider = ({ children }) => {
         try {
           // Hydrate immediately from storage so UI isn't blank
           setUser(JSON.parse(storedUser));
+          fetchFavoriteIds();
           // Then verify & refresh from server
           const response = await authAPI.getMe();
           const freshUser = response.data;
@@ -34,6 +65,7 @@ export const AuthProvider = ({ children }) => {
           const stored = localStorage.getItem('token');
           if (!stored) {
             setUser(null);
+            setFavoriteIds([]);
           }
         }
       }
@@ -41,7 +73,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     initAuth();
-  }, []);
+  }, [fetchFavoriteIds]);
 
   const login = async (email, password) => {
     const response = await authAPI.login({ email, password });
@@ -49,6 +81,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
+    fetchFavoriteIds();
     return response.data;
   };
 
@@ -59,6 +92,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
+    fetchFavoriteIds();
     return response.data;
   };
 
@@ -71,6 +105,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    setFavoriteIds([]);
   };
 
   const updateProfile = async (data) => {
@@ -85,7 +120,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading, updateProfile }}>
+    <AuthContext.Provider value={{
+      user,
+      login,
+      register,
+      logout,
+      loading,
+      updateProfile,
+      favoriteIds,
+      fetchFavoriteIds,
+      isFavorited,
+      toggleFavoriteId
+    }}>
       {children}
     </AuthContext.Provider>
   );

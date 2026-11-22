@@ -57,8 +57,8 @@ const VersionHistoryDrawer = ({ snippetId, currentSnippet, isOpen, onClose, onSn
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-3xl bg-white dark:bg-custom-dark-card border-l border-slate-200 dark:border-custom-dark-border h-full shadow-2xl flex flex-col overflow-hidden animate-slide-left">
+    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-sm animate-fade-in p-0 sm:p-3">
+      <div className="relative w-full max-w-3xl bg-white dark:bg-custom-dark-card border border-slate-200/80 dark:border-custom-dark-border rounded-none sm:rounded-3xl h-full shadow-2xl flex flex-col overflow-hidden animate-slide-left">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-custom-dark-border">
           <div className="flex items-center gap-2.5">

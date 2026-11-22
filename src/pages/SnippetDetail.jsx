@@ -10,7 +10,12 @@ import TagChip from '../components/TagChip';
 import FavoriteButton from '../components/FavoriteButton';
 import PinnedBadge from '../components/PinnedBadge';
 import VersionHistoryDrawer from '../components/VersionHistoryDrawer';
-import { FiFrown, FiFolder, FiGlobe, FiLock, FiGitBranch } from 'react-icons/fi';
+import ExportModal from '../components/ExportModal';
+import CheatSheetModal from '../components/CheatSheetModal';
+import CodeMetricsModal from '../components/CodeMetricsModal';
+import StudentQuizModal from '../components/StudentQuizModal';
+import ShareEmbedModal from '../components/ShareEmbedModal';
+import { FiFrown, FiFolder, FiGlobe, FiLock, FiGitBranch, FiDownload, FiBookOpen, FiActivity, FiAward, FiShare2 } from 'react-icons/fi';
 
 const SnippetDetail = () => {
   const { id } = useParams();
@@ -28,6 +33,11 @@ const SnippetDetail = () => {
   const [userCollections, setUserCollections] = useState([]);
   const [addingToCollection, setAddingToCollection] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [cheatSheetOpen, setCheatSheetOpen] = useState(false);
+  const [metricsOpen, setMetricsOpen] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     document.title = snippet ? `${snippet.title} | Code Snippet Manager` : 'Snippet | Code Snippet Manager';
@@ -169,9 +179,9 @@ const SnippetDetail = () => {
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-1.5">
                   <div className="w-6 h-6 rounded-full gradient-bg flex items-center justify-center text-white text-[10px] font-bold">
-                    {snippet.author?.username?.slice(0, 1).toUpperCase()}
+                    {snippet.author?.username?.slice(0, 1).toUpperCase() || '?'}
                   </div>
-                  {snippet.author?.username}
+                  {snippet.author?.username || 'Unknown'}
                 </span>
                 <span className="flex items-center gap-1">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx={12} cy={12} r={3} /></svg>
@@ -312,6 +322,61 @@ const SnippetDetail = () => {
                 Version History
               </button>
 
+              {/* 1-Click Export Suite */}
+              <button
+                type="button"
+                onClick={() => setExportOpen(true)}
+                className="btn-secondary text-sm flex items-center gap-1.5"
+                title="Export or download snippet"
+              >
+                <FiDownload className="w-4 h-4 text-emerald-500" />
+                Export
+              </button>
+
+              {/* Developer & Student Cheat Sheet */}
+              <button
+                type="button"
+                onClick={() => setCheatSheetOpen(true)}
+                className="btn-secondary text-sm flex items-center gap-1.5"
+                title="Quick syntax & Big-O cheat sheet"
+              >
+                <FiBookOpen className="w-4 h-4 text-indigo-500" />
+                Cheat Sheet
+              </button>
+
+              {/* Code Complexity & Metrics */}
+              <button
+                type="button"
+                onClick={() => setMetricsOpen(true)}
+                className="btn-secondary text-sm flex items-center gap-1.5"
+                title="Code health, branching & cyclomatic complexity metrics"
+              >
+                <FiActivity className="w-4 h-4 text-cyan-500" />
+                Metrics
+              </button>
+
+              {/* Student Practice & Quiz Mode */}
+              <button
+                type="button"
+                onClick={() => setQuizOpen(true)}
+                className="btn-secondary text-sm flex items-center gap-1.5"
+                title="Student active-recall practice & quiz"
+              >
+                <FiAward className="w-4 h-4 text-amber-500" />
+                Quiz Me
+              </button>
+
+              {/* Share & Embed Modal */}
+              <button
+                type="button"
+                onClick={() => setShareOpen(true)}
+                className="btn-secondary text-sm flex items-center gap-1.5"
+                title="Share link, responsive embed code, or CLI stream"
+              >
+                <FiShare2 className="w-4 h-4 text-purple-500" />
+                Share & Embed
+              </button>
+
               {/* Add to collection */}
               {user && (
                 <button onClick={() => setShowAddToCollection(true)} className="btn-secondary text-sm">
@@ -412,6 +477,41 @@ const SnippetDetail = () => {
           await fetchSnippet();
         }}
         isOwner={isOwner}
+      />
+
+      {/* 1-Click Export Suite Modal */}
+      <ExportModal
+        isOpen={exportOpen}
+        onClose={() => setExportOpen(false)}
+        snippet={snippet}
+      />
+
+      {/* Developer & Student Cheat Sheet Modal */}
+      <CheatSheetModal
+        isOpen={cheatSheetOpen}
+        onClose={() => setCheatSheetOpen(false)}
+      />
+
+      {/* Code Health & Complexity Metrics Modal */}
+      <CodeMetricsModal
+        isOpen={metricsOpen}
+        onClose={() => setMetricsOpen(false)}
+        code={snippet?.code}
+        language={snippet?.language}
+      />
+
+      {/* Student Active-Recall & Quiz Modal */}
+      <StudentQuizModal
+        isOpen={quizOpen}
+        onClose={() => setQuizOpen(false)}
+        snippet={snippet}
+      />
+
+      {/* Share & Responsive Embed Modal */}
+      <ShareEmbedModal
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        snippet={snippet}
       />
     </div>
   );

@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import CommandPalette from './CommandPalette';
-import { FiSearch, FiCommand } from 'react-icons/fi';
+import CheatSheetModal from './CheatSheetModal';
+import { FiSearch, FiCommand, FiBookOpen } from 'react-icons/fi';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -12,6 +13,7 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [cheatSheetOpen, setCheatSheetOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -87,7 +89,7 @@ const Navbar = () => {
               <Link
                 key={to}
                 to={to}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-105 dark:hover:bg-custom-dark-surface hover:text-slate-900 dark:hover:text-white transition-all duration-150"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all duration-150"
               >
                 {icon}
                 {label}
@@ -101,14 +103,27 @@ const Navbar = () => {
             <button
               type="button"
               onClick={() => setSearchModalOpen(true)}
-              className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-custom-dark-surface hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              className="inline-flex items-center gap-2 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-custom-dark-surface hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
               title="Quick Search (Cmd+K or Ctrl+K)"
+              aria-label="Quick Search"
             >
               <FiSearch className="w-3.5 h-3.5 text-custom-orangered" />
-              <span>Quick Search</span>
+              <span className="hidden sm:inline">Quick Search</span>
               <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-custom-dark-card border border-slate-200 dark:border-custom-dark-border rounded shadow-sm">
                 ⌘K
               </kbd>
+            </button>
+
+            {/* Cheat Sheet Button */}
+            <button
+              type="button"
+              onClick={() => setCheatSheetOpen(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-custom-dark-surface hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              title="Developer & Student Cheat Sheet (Big-O, JS, Python, Git)"
+              aria-label="Cheat Sheet"
+            >
+              <FiBookOpen className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Cheat Sheet</span>
             </button>
 
             {/* Theme toggle (Desktop only) */}
@@ -351,6 +366,11 @@ const Navbar = () => {
       <CommandPalette
         isOpen={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}
+      />
+
+      <CheatSheetModal
+        isOpen={cheatSheetOpen}
+        onClose={() => setCheatSheetOpen(false)}
       />
     </nav>
   );

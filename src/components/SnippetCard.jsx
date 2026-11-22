@@ -22,7 +22,7 @@ const defaultLangColor = 'from-orange-50 to-red-50 dark:from-orange-900/20 dark:
 
 const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled, onTagClick }) => {
   const codePreview = snippet.code ? snippet.code.substring(0, 150) : '';
-  const { user } = useAuth();
+  const { user, isFavorited, toggleFavoriteId } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [forking, setForking] = useState(false);
@@ -288,8 +288,13 @@ const SnippetCard = ({ snippet, onDeleted, onUpdated, onLikeToggled, onTagClick 
             {/* Favorite button */}
             <FavoriteButton
               snippetId={snippet._id}
-              initialFavorited={Boolean(snippet.isFavorited)}
+              initialFavorited={
+                snippet.isFavorited !== undefined
+                  ? Boolean(snippet.isFavorited)
+                  : Boolean(isFavorited?.(snippet._id))
+              }
               initialCount={snippet.favoriteCount || 0}
+              onToggle={(id, nextFav) => toggleFavoriteId?.(id, nextFav)}
               size="sm"
             />
 

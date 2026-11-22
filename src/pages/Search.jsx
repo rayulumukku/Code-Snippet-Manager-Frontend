@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { searchAPI } from '../services/api';
 import SnippetCard from '../components/SnippetCard';
+import Pagination from '../components/Pagination';
 import TagInput from '../components/TagInput';
 import TagFilter from '../components/TagFilter';
 import TagChip from '../components/TagChip';
@@ -13,6 +14,8 @@ const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [query, setQuery] = useState(searchParams.get('q') || '');
+  const [debouncedQuery, setDebouncedQuery] = useState(searchParams.get('q') || '');
+  const activeRequestIdRef = useRef(0);
   const [language, setLanguage] = useState(searchParams.get('language') || '');
   const [author, setAuthor] = useState(searchParams.get('author') || '');
   const [dateRange, setDateRange] = useState(searchParams.get('dateRange') || '');
@@ -31,6 +34,14 @@ const Search = () => {
   const [showFilters, setShowFilters] = useState(
     Boolean(searchParams.get('tags') || searchParams.get('language') || searchParams.get('author') || searchParams.get('dateRange'))
   );
+
+  // 300ms debounce for search query input to avoid backend flood
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [query]);
 
   useEffect(() => {
     document.title = 'Search Snippets & Collections | Code Snippet Manager';
@@ -58,15 +69,16 @@ const Search = () => {
 
   const handleSearch = useCallback(async (e) => {
     if (e) e.preventDefault();
+    const requestId = ++activeRequestIdRef.current;
     setLoading(true);
 
-    if (query.trim()) {
-      addRecentSearch(query.trim());
+    if (debouncedQuery.trim()) {
+      addRecentSearch(debouncedQuery.trim());
     }
 
     try {
       const params = {
-        q: query || undefined,
+        q: debouncedQuery || undefined,
         type,
         language: type === 'snippets' && language ? language : undefined,
         author: type === 'snippets' && author ? author : undefined,
@@ -78,6 +90,9 @@ const Search = () => {
       };
 
       const response = await searchAPI.search(params);
+      // Discard stale responses from older search requests
+      if (requestId !== activeRequestIdRef.current) return;
+
       setResults(response.data.results || []);
       setPagination({
         totalPages: response.data.totalPages || 1,
@@ -85,12 +100,15 @@ const Search = () => {
         executionTimeMs: response.data.executionTimeMs || 0,
       });
     } catch (error) {
+      if (requestId !== activeRequestIdRef.current) return;
       console.error('Search error:', error);
       setResults([]);
     } finally {
-      setLoading(false);
+      if (requestId === activeRequestIdRef.current) {
+        setLoading(false);
+      }
     }
-  }, [query, type, language, author, dateRange, sort, tags, page, calculateDateFrom]);
+  }, [debouncedQuery, type, language, author, dateRange, sort, tags, page, calculateDateFrom]);
 
   useEffect(() => {
     const qParam = searchParams.get('q') || '';
@@ -103,14 +121,25 @@ const Search = () => {
     const tagsParam = paramTags ? paramTags.split(',').map((t) => t.trim()).filter(Boolean) : [];
     const pageParam = parseInt(searchParams.get('page') || '1', 10);
 
-    setQuery(qParam);
-    setType(typeParam);
-    setLanguage(langParam);
-    setAuthor(authorParam);
-    setDateRange(dateRangeParam);
-    setSort(sortParam);
-    setTags(tagsParam);
-    setPage(pageParam);
+    setQuery((curr) => {
+      if (curr !== qParam) {
+        setDebouncedQuery(qParam);
+        return qParam;
+      }
+      return curr;
+    });
+    setType((prev) => (prev === typeParam ? prev : typeParam));
+    setLanguage((prev) => (prev === langParam ? prev : langParam));
+    setAuthor((prev) => (prev === authorParam ? prev : authorParam));
+    setDateRange((prev) => (prev === dateRangeParam ? prev : dateRangeParam));
+    setSort((prev) => (prev === sortParam ? prev : sortParam));
+    setTags((prev) => {
+      if (prev.length === tagsParam.length && prev.every((t, i) => t === tagsParam[i])) {
+        return prev;
+      }
+      return tagsParam;
+    });
+    setPage((prev) => (prev === pageParam ? prev : pageParam));
     if (tagsParam.length > 0 || langParam || authorParam || dateRangeParam) {
       setShowFilters(true);
     }
@@ -118,7 +147,7 @@ const Search = () => {
 
   useEffect(() => {
     const newParams = {};
-    if (query) newParams.q = query;
+    if (debouncedQuery) newParams.q = debouncedQuery;
     if (type !== 'snippets') newParams.type = type;
     if (language) newParams.language = language;
     if (author) newParams.author = author;
@@ -127,9 +156,30 @@ const Search = () => {
     if (tags.length > 0) newParams.tags = tags.join(',');
     if (page > 1) newParams.page = String(page);
 
-    setSearchParams(newParams, { replace: true });
+    const currentQ = searchParams.get('q') || '';
+    const currentType = searchParams.get('type') || 'snippets';
+    const currentLang = searchParams.get('language') || '';
+    const currentAuthor = searchParams.get('author') || '';
+    const currentDateRange = searchParams.get('dateRange') || '';
+    const currentSort = searchParams.get('sort') || 'relevance';
+    const currentTags = searchParams.get('tags') || '';
+    const currentPage = searchParams.get('page') || '1';
+
+    const hasChanged =
+      (newParams.q || '') !== currentQ ||
+      (newParams.type || 'snippets') !== currentType ||
+      (newParams.language || '') !== currentLang ||
+      (newParams.author || '') !== currentAuthor ||
+      (newParams.dateRange || '') !== currentDateRange ||
+      (newParams.sort || 'relevance') !== currentSort ||
+      (newParams.tags || '') !== currentTags ||
+      (newParams.page || '1') !== currentPage;
+
+    if (hasChanged) {
+      setSearchParams(newParams, { replace: true });
+    }
     handleSearch();
-  }, [query, type, language, author, dateRange, sort, tags, page, setSearchParams, handleSearch]);
+  }, [debouncedQuery, type, language, author, dateRange, sort, tags, page, searchParams, setSearchParams, handleSearch]);
 
   const handleTagToggle = (tag) => {
     setPage(1);
@@ -260,19 +310,23 @@ const Search = () => {
                 <FiTrendingUp className="w-3.5 h-3.5 text-custom-orangered" /> Trending:
               </span>
               <div className="flex items-center gap-1.5 shrink-0">
-                {trending.map(({ term }) => (
-                  <button
-                    key={term}
-                    type="button"
-                    onClick={() => {
-                      setQuery(term);
-                      setPage(1);
-                    }}
-                    className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-custom-dark-surface hover:bg-orange-50 dark:hover:bg-orange-950/20 text-slate-600 dark:text-slate-300 hover:text-custom-orangered transition-colors border border-slate-200/60 dark:border-custom-dark-border"
-                  >
-                    {term}
-                  </button>
-                ))}
+                {trending.map((item, idx) => {
+                  const term = typeof item === 'string' ? item : item?.term;
+                  if (!term) return null;
+                  return (
+                    <button
+                      key={`${term}-${idx}`}
+                      type="button"
+                      onClick={() => {
+                        setQuery(term);
+                        setPage(1);
+                      }}
+                      className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-custom-dark-surface hover:bg-orange-50 dark:hover:bg-orange-950/20 text-slate-600 dark:text-slate-300 hover:text-custom-orangered transition-colors border border-slate-200/60 dark:border-custom-dark-border"
+                    >
+                      {term}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -346,8 +400,8 @@ const Search = () => {
 
       {/* Results Grid / Loading State / Empty State */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
               className="h-64 rounded-2xl border border-slate-200 dark:border-custom-dark-border bg-slate-100 dark:bg-custom-dark-surface animate-pulse"
@@ -357,7 +411,7 @@ const Search = () => {
       ) : results.length > 0 ? (
         <div>
           {type === 'snippets' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
               {results.map((snippet) => (
                 <SnippetCard
                   key={snippet._id}
@@ -367,7 +421,7 @@ const Search = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
               {results.map((collection) => (
                 <div
                   key={collection._id}
@@ -409,32 +463,15 @@ const Search = () => {
 
           {/* Pagination Controls */}
           {pagination.totalPages > 1 && (
-            <div className="mt-10 flex justify-center items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setPage((p) => Math.max(1, p - 1));
+            <div className="mt-10">
+              <Pagination
+                currentPage={page}
+                totalPages={pagination.totalPages}
+                onPageChange={(newPage) => {
+                  setPage(newPage);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                disabled={page === 1}
-                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-custom-dark-border bg-white dark:bg-custom-dark-card text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-custom-dark-surface transition-colors flex items-center gap-1 text-sm font-medium"
-              >
-                <FiChevronLeft className="w-4 h-4" /> Previous
-              </button>
-              <span className="text-sm font-mono text-slate-500 dark:text-slate-400 px-3 py-2">
-                Page {page} of {pagination.totalPages}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setPage((p) => Math.min(pagination.totalPages, p + 1));
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                disabled={page >= pagination.totalPages}
-                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-custom-dark-border bg-white dark:bg-custom-dark-card text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-custom-dark-surface transition-colors flex items-center gap-1 text-sm font-medium"
-              >
-                Next <FiChevronRight className="w-4 h-4" />
-              </button>
+              />
             </div>
           )}
         </div>

@@ -98,6 +98,7 @@ const FavoriteButton = ({
           : 'text-slate-500 dark:text-slate-400 hover:text-amber-500 hover:bg-slate-100 dark:hover:bg-custom-dark-surface'
       } ${className}`}
       title={isFavorited ? 'Remove from Favorites' : 'Add to Favorites'}
+      aria-label={isFavorited ? 'Remove from Favorites' : 'Add to Favorites'}
     >
       <FiBookmark
         className={`${iconSizes[size] || iconSizes.md} transition-transform duration-200 ${

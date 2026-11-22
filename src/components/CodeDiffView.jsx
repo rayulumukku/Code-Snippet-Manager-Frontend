@@ -65,7 +65,7 @@ const CodeDiffView = ({ oldCode = '', newCode = '', oldTitle = 'Previous Version
         <div className="grid grid-cols-2 divide-x divide-slate-800 overflow-x-auto max-h-[60vh]">
           {/* Left Column (Old Version) */}
           <div className="p-3">
-            <div className="text-[11px] font-bold text-red-400 mb-2 border-b border-slate-800 pb-1 font-sans truncate">
+            <div className="inline-block px-2.5 py-1 rounded-lg bg-red-950/40 text-red-300 border border-red-900/50 mb-2 text-[11px] font-bold font-sans truncate">
               - {oldTitle}
             </div>
             <pre className="space-y-0.5">
@@ -89,7 +89,7 @@ const CodeDiffView = ({ oldCode = '', newCode = '', oldTitle = 'Previous Version
 
           {/* Right Column (New Version) */}
           <div className="p-3">
-            <div className="text-[11px] font-bold text-emerald-400 mb-2 border-b border-slate-800 pb-1 font-sans truncate">
+            <div className="inline-block px-2.5 py-1 rounded-lg bg-emerald-950/40 text-emerald-300 border border-emerald-900/50 mb-2 text-[11px] font-bold font-sans truncate">
               + {newTitle}
             </div>
             <pre className="space-y-0.5">

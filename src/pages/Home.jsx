@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import SnippetCard from '../components/SnippetCard';
 import TagFilter from '../components/TagFilter';
 import PinnedSection from '../components/PinnedSection';
+import Pagination from '../components/Pagination';
 import { useToast } from '../context/ToastContext';
 import { FiSearch, FiBookmark } from 'react-icons/fi';
 
@@ -22,7 +23,7 @@ const SORT_OPTIONS = [
 ];
 
 const Home = () => {
-  const { user } = useAuth();
+  const { user, favoriteIds } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -47,6 +48,13 @@ const Home = () => {
   }, []);
 
   const fetchSnippets = useCallback(async () => {
+    if (!user && (activeTab === 'mine' || activeTab === 'favorites')) {
+      setSnippets([]);
+      setPagination({ totalPages: 1, currentPage: 1, total: 0 });
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const params = { ...filters };
@@ -56,11 +64,20 @@ const Home = () => {
         ? await favoritesAPI.getFavorites(params)
         : await snippetsAPI.getAll(params);
 
-      setSnippets(response.data.snippets);
+      const snips = response.data.snippets || [];
+      const favList = favoriteIds || [];
+      const hydrated = user && favList.length > 0
+        ? snips.map(s => ({
+            ...s,
+            isFavorited: s.isFavorited !== undefined ? s.isFavorited : favList.includes(s._id?.toString()),
+          }))
+        : snips;
+
+      setSnippets(hydrated);
       setPagination({
-        totalPages: response.data.totalPages,
-        currentPage: response.data.currentPage,
-        total: response.data.total,
+        totalPages: response.data.totalPages || 1,
+        currentPage: response.data.currentPage || 1,
+        total: response.data.total || 0,
       });
     } catch (error) {
       toast.error('Failed to load snippets');
@@ -68,7 +85,7 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters, activeTab, user, toast]);
+  }, [filters, activeTab, user, favoriteIds, toast]);
 
   useEffect(() => {
     fetchSnippets();
@@ -249,10 +266,32 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Snippet grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
+        {/* Snippet grid or Guest Callout */}
+        {!user && (activeTab === 'mine' || activeTab === 'favorites') ? (
+          <div className="text-center py-16 px-4 bg-white dark:bg-custom-dark-card border border-slate-200 dark:border-custom-dark-border rounded-3xl animate-fade-in shadow-sm max-w-lg mx-auto">
+            <div className="w-14 h-14 rounded-2xl bg-orange-50 dark:bg-orange-950/30 text-custom-orangered flex items-center justify-center mx-auto mb-4">
+              <FiBookmark className="w-7 h-7" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+              {activeTab === 'mine' ? 'Sign in to view your snippets' : 'Sign in to view your favorites'}
+            </h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm leading-relaxed">
+              {activeTab === 'mine'
+                ? 'Create an account or sign in to save, organize, and manage your personal code snippets.'
+                : 'Save and bookmark snippets across the platform to access them anytime in your favorites list.'}
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <Link to="/login" className="btn-primary px-5 py-2.5 text-sm">
+                Sign In
+              </Link>
+              <Link to="/register" className="btn-secondary px-5 py-2.5 text-sm">
+                Create Account
+              </Link>
+            </div>
+          </div>
+        ) : loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="h-64 rounded-xl border border-slate-200 dark:border-custom-dark-border bg-slate-100 dark:bg-custom-dark-surface animate-pulse" />
             ))}
           </div>
@@ -271,7 +310,7 @@ const Home = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
               {snippets.map(snippet => (
                 <SnippetCard
                   key={snippet._id}
@@ -285,42 +324,13 @@ const Home = () => {
             </div>
 
             {/* Pagination */}
-            {pagination.totalPages > 1 && (
-              <div className="mt-10 flex justify-center items-center gap-2">
-                <button
-                  onClick={() => handlePageChange(pagination.currentPage - 1)}
-                  disabled={pagination.currentPage === 1}
-                  className="btn-secondary py-2 px-4 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  ← Previous
-                </button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
-                    const page = i + 1;
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
-                          pagination.currentPage === page
-                            ? 'gradient-bg text-white shadow-md'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-custom-dark-surface'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                </div>
-                <button
-                  onClick={() => handlePageChange(pagination.currentPage + 1)}
-                  disabled={pagination.currentPage === pagination.totalPages}
-                  className="btn-secondary py-2 px-4 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Next →
-                </button>
-              </div>
-            )}
+            <div className="mt-10">
+              <Pagination
+                currentPage={pagination.currentPage || 1}
+                totalPages={pagination.totalPages || 1}
+                onPageChange={handlePageChange}
+              />
+            </div>
           </>
         )}
       </div>
